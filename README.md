@@ -24,9 +24,16 @@ CineLog is a premium, high-end movie diary and library application for Android, 
 - **Navigation**: Jetpack Navigation Component
 - **Aesthetics**: Custom glassmorphism modifiers (`glassCard`, `glassSurface`), bounce-click animations, and regal animated shimmer effects.
 
-## Building
+## Download & Install (APK)
 
-To build the APK locally, you need a [TMDB API Key](https://developer.themoviedb.org/docs).
+You can download the latest pre-built **CineLog APK** from the [Releases](https://github.com/krypton-arch/Cine-Log/releases) page of this repository.
+
+1. Download `app-debug.apk` to your Android device.
+2. Open the file to install (you may need to enable "Install from Unknown Sources" in your device settings).
+
+## Building from Source
+
+To build the APK locally yourself, you need a [TMDB API Key](https://developer.themoviedb.org/docs).
 Add it to your `local.properties`:
 
 ```properties
