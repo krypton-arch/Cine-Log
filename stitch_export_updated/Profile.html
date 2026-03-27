@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#003641",
+              "on-error": "#690005",
+              "on-surface": "#e5e2e1",
+              "error-container": "#93000a",
+              "surface-container-high": "#2a2a2a",
+              "inverse-primary": "#745b00",
+              "secondary-container": "#59470c",
+              "on-tertiary-fixed-variant": "#004e5e",
+              "surface": "#131313",
+              "on-error-container": "#ffdad6",
+              "surface-container-highest": "#353534",
+              "tertiary-container": "#49dbff",
+              "outline-variant": "#4e4633",
+              "background": "#131313",
+              "on-secondary": "#3d2f00",
+              "surface-variant": "#353534",
+              "on-secondary-fixed-variant": "#56450a",
+              "error": "#ffb4ab",
+              "surface-container-lowest": "#0e0e0e",
+              "on-primary": "#3d2f00",
+              "secondary": "#dec47e",
+              "primary-container": "#f5c518",
+              "on-primary-fixed": "#241a00",
+              "primary-fixed": "#ffe08b",
+              "surface-dim": "#131313",
+              "inverse-surface": "#e5e2e1",
+              "on-primary-fixed-variant": "#584400",
+              "surface-container-low": "#1c1b1b",
+              "tertiary": "#bdefff",
+              "on-tertiary-fixed": "#001f27",
+              "on-secondary-container": "#d0b671",
+              "surface-container": "#201f1f",
+              "surface-tint": "#f0c110",
+              "on-surface-variant": "#d1c5ac",
+              "primary": "#ffe5a0",
+              "tertiary-fixed-dim": "#42d7fb",
+              "outline": "#9a9078",
+              "primary-fixed-dim": "#f0c110",
+              "on-background": "#e5e2e1",
+              "inverse-on-surface": "#313030",
+              "secondary-fixed": "#fce097",
+              "on-tertiary-container": "#005e70",
+              "secondary-fixed-dim": "#dec47e",
+              "surface-bright": "#3a3939",
+              "on-secondary-fixed": "#241a00",
+              "on-primary-container": "#695200",
+              "tertiary-fixed": "#b0ecff"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif", "serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e0e0e;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(245,197,24,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(245,197,24,0.02) 0%, transparent 50%);
+        }
+        .grain-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        .noto-serif { font-family: 'Noto Serif', serif; }
+        .technical-label { font-family: 'Inter', sans-serif; letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.7rem; font-weight: 600; opacity: 0.6; }
+        .serif-label { font-family: 'Noto Serif', serif; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.75rem; font-weight: 700; opacity: 0.8; }
+        .glass-card {
+            background: rgba(42, 42, 42, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-nav {
+            background: rgba(19, 19, 19, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(245, 197, 24, 0.1);
+        }
+        .glass-footer {
+            background: rgba(19, 19, 19, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(245, 197, 24, 0.1);
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen pb-28">
+<div class="grain-overlay"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 glass-nav flex items-center justify-between px-6 h-16">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#F5C518] text-xl" data-icon="local_movies">local_movies</span>
+<h1 class="text-xl font-bold tracking-[-0.01em] text-[#F5C518] font-['Noto_Serif']">CINELOG</h1>
+</div>
+<div class="text-[#F5C518] font-['Noto_Serif'] font-bold text-sm tracking-tight hover:opacity-80 transition-opacity cursor-pointer px-3 py-1 bg-primary-container/10 rounded-full border border-primary-container/20">
+        128 XP • 7 🔥
+    </div>
+</header>
+<main class="pt-24 px-6 max-w-5xl mx-auto space-y-10">
+<!-- Hero: Level & Progress -->
+<section class="relative space-y-6">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="space-y-1">
+<p class="serif-label text-primary-container/70">Current Status</p>
+<h2 class="text-4xl md:text-5xl font-headline font-bold text-on-surface tracking-tight">
+                    Level 12: <span class="text-primary-container italic font-bold">Auteur</span>
+</h2>
+</div>
+<div class="flex items-center gap-3 glass-card p-3 rounded-lg border-primary-container/20">
+<span class="material-symbols-outlined text-primary-container text-3xl" data-icon="local_fire_department" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<div>
+<p class="serif-label text-[0.6rem]">7-Day Streak</p>
+<p class="text-xl font-headline font-bold text-on-surface">Cinema Devotee</p>
+</div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<p class="serif-label">XP PROGRESSION</p>
+<p class="text-primary-container font-headline text-sm font-bold">2,450 / 3,000 XP</p>
+</div>
+<div class="h-2 w-full bg-surface-container-high/50 rounded-full overflow-hidden border border-white/5">
+<div class="h-full bg-primary-container w-[81%] shadow-[0_0_15px_rgba(245,197,24,0.4)] relative">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Grid & Passport Bento -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+<!-- Genre Passport (Large) -->
+<section class="md:col-span-8 glass-card rounded-xl p-6 relative overflow-hidden group border-white/10 hover:border-primary-container/30 transition-all duration-500">
+<div class="relative z-10 flex flex-col h-full">
+<p class="serif-label mb-6">Genre Passport</p>
+<div class="flex flex-col md:flex-row items-center gap-8 flex-grow">
+<!-- Custom Visual Graphic for Genres -->
+<div class="relative w-40 h-40 flex items-center justify-center shrink-0">
+<div class="absolute inset-0 border-[10px] border-primary-container/10 rounded-full"></div>
+<div class="absolute inset-0 border-[10px] border-primary-container rounded-full" style="clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 60%); shadow: 0 0 10px rgba(245,197,24,0.3)"></div>
+<div class="text-center">
+<span class="text-3xl font-headline font-bold text-on-surface">40%</span>
+<p class="serif-label text-[0.6rem] opacity-60">Sci-Fi</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-x-10 gap-y-4 w-full">
+<div class="space-y-1">
+<div class="flex justify-between text-xs font-headline font-semibold">
+<span class="text-on-surface-variant">Sci-Fi</span>
+<span class="text-on-surface">40%</span>
+</div>
+<div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-primary-container w-[40%] shadow-[0_0_8px_rgba(245,197,24,0.4)]"></div></div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-xs font-headline font-semibold">
+<span class="text-on-surface-variant">Drama</span>
+<span class="text-on-surface">30%</span>
+</div>
+<div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-on-surface-variant w-[30%]"></div></div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-xs font-headline font-semibold">
+<span class="text-on-surface-variant">Noir</span>
+<span class="text-on-surface">15%</span>
+</div>
+<div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-on-surface-variant w-[15%]"></div></div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-xs font-headline font-semibold">
+<span class="text-on-surface-variant">Horror</span>
+<span class="text-on-surface">10%</span>
+</div>
+<div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-on-surface-variant w-[10%]"></div></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative element -->
+<div class="absolute -right-12 -bottom-12 w-64 h-64 bg-primary-container/5 rounded-full blur-3xl group-hover:bg-primary-container/10 transition-all duration-700"></div>
+</section>
+<!-- Stat Cards (Right Column) -->
+<div class="md:col-span-4 flex flex-col gap-4">
+<div class="glass-card p-5 rounded-xl border-white/5 hover:border-primary-container/40 transition-all duration-300">
+<p class="serif-label">Total Films</p>
+<p class="text-3xl font-headline font-bold mt-1">1,248</p>
+</div>
+<div class="glass-card p-5 rounded-xl border-white/5 hover:border-primary-container/40 transition-all duration-300">
+<p class="serif-label">Hours Watched</p>
+<p class="text-3xl font-headline font-bold mt-1">2,560</p>
+</div>
+<div class="glass-card p-5 rounded-xl border-white/5 hover:border-primary-container/40 transition-all duration-300">
+<p class="serif-label">Avg. Rating</p>
+<div class="flex items-center gap-2 mt-1">
+<p class="text-3xl font-headline font-bold">4.2</p>
+<span class="material-symbols-outlined text-primary-container text-xl" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Badge Showcase -->
+<section class="space-y-5">
+<div class="flex justify-between items-center">
+<p class="serif-label">Badge Showcase</p>
+<button class="text-xs font-headline font-bold italic text-primary-container hover:text-white transition-colors tracking-wide">VIEW GALLERY</button>
+</div>
+<div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+<div class="glass-card aspect-square rounded-xl flex flex-col items-center justify-center p-3 text-center group hover:bg-white/5 transition-all duration-300">
+<span class="material-symbols-outlined text-3xl mb-2 text-on-surface-variant group-hover:text-primary-container transition-colors" data-icon="dark_mode">dark_mode</span>
+<p class="text-[0.6rem] font-headline font-bold uppercase tracking-widest leading-tight">Night Owl</p>
+</div>
+<div class="glass-card aspect-square rounded-xl flex flex-col items-center justify-center p-3 text-center group hover:bg-white/5 transition-all duration-300">
+<span class="material-symbols-outlined text-3xl mb-2 text-on-surface-variant group-hover:text-primary-container transition-colors" data-icon="explore">explore</span>
+<p class="text-[0.6rem] font-headline font-bold uppercase tracking-widest leading-tight">Explorer</p>
+</div>
+<div class="glass-card aspect-square rounded-xl flex flex-col items-center justify-center p-3 text-center group hover:bg-primary-container/10 transition-all duration-300 border-primary-container/30">
+<span class="material-symbols-outlined text-3xl mb-2 text-primary-container" data-icon="movie_filter" style="font-variation-settings: 'FILL' 1;">movie_filter</span>
+<p class="text-[0.6rem] font-headline font-bold uppercase tracking-widest leading-tight text-primary-container">Noir Fan</p>
+</div>
+<div class="glass-card aspect-square rounded-xl flex flex-col items-center justify-center p-3 text-center group hover:bg-white/5 transition-all duration-300">
+<span class="material-symbols-outlined text-3xl mb-2 text-on-surface-variant group-hover:text-primary-container transition-colors" data-icon="calendar_month">calendar_month</span>
+<p class="text-[0.6rem] font-headline font-bold uppercase tracking-widest leading-tight">Collector</p>
+</div>
+<div class="glass-card aspect-square rounded-xl flex flex-col items-center justify-center p-3 text-center group hover:bg-white/5 transition-all duration-300">
+<span class="material-symbols-outlined text-3xl mb-2 text-on-surface-variant group-hover:text-primary-container transition-colors" data-icon="history_edu">history_edu</span>
+<p class="text-[0.6rem] font-headline font-bold uppercase tracking-widest leading-tight">Archivist</p>
+</div>
+<div class="glass-card aspect-square rounded-xl flex flex-col items-center justify-center p-3 text-center group hover:bg-white/5 transition-all duration-300">
+<span class="material-symbols-outlined text-3xl mb-2 text-on-surface-variant group-hover:text-primary-container transition-colors" data-icon="auto_stories">auto_stories</span>
+<p class="text-[0.6rem] font-headline font-bold uppercase tracking-widest leading-tight">Master</p>
+</div>
+</div>
+</section>
+<!-- Secondary Stats & Monthly Challenge -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+<!-- Monthly Challenge -->
+<section class="glass-card rounded-xl p-6 relative overflow-hidden group">
+<div class="relative z-10 space-y-5">
+<div>
+<p class="serif-label text-primary-container mb-2">Monthly Challenge</p>
+<h3 class="text-xl font-headline font-bold">Watch 5 Indie Films</h3>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Experience the raw essence of independent cinema this month.</p>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-[10px] font-headline font-bold uppercase tracking-widest">
+<span class="text-on-surface">3 / 5 logged</span>
+<span class="text-primary-container">60% Complete</span>
+</div>
+<div class="flex gap-1.5">
+<div class="h-1.5 flex-grow bg-primary-container rounded-full shadow-[0_0_8px_rgba(245,197,24,0.3)]"></div>
+<div class="h-1.5 flex-grow bg-primary-container rounded-full shadow-[0_0_8px_rgba(245,197,24,0.3)]"></div>
+<div class="h-1.5 flex-grow bg-primary-container rounded-full shadow-[0_0_8px_rgba(245,197,24,0.3)]"></div>
+<div class="h-1.5 flex-grow bg-white/5 rounded-full"></div>
+<div class="h-1.5 flex-grow bg-white/5 rounded-full"></div>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary text-xs font-headline font-bold py-2.5 rounded-lg hover:brightness-110 transition-all uppercase tracking-widest shadow-lg shadow-primary-container/10">
+                    View Eligible Films
+                </button>
+</div>
+<!-- Glassy background flare -->
+<div class="absolute -top-8 -right-8 w-24 h-24 bg-primary-container/5 blur-2xl rounded-full group-hover:bg-primary-container/15 transition-all duration-500"></div>
+</section>
+<!-- More Stats Bento -->
+<div class="grid grid-cols-1 gap-3">
+<div class="flex items-center justify-between p-4 glass-card rounded-xl hover:border-white/20 transition-all">
+<div>
+<p class="serif-label">Favorite Decade</p>
+<p class="text-xl font-headline font-bold">1970s</p>
+</div>
+<span class="material-symbols-outlined text-2xl opacity-10" data-icon="schedule">schedule</span>
+</div>
+<div class="flex items-center justify-between p-4 glass-card rounded-xl hover:border-white/20 transition-all">
+<div>
+<p class="serif-label">Top Director</p>
+<p class="text-xl font-headline font-bold">Denis Villeneuve</p>
+</div>
+<span class="material-symbols-outlined text-2xl opacity-10" data-icon="person_search">person_search</span>
+</div>
+<div class="flex items-center justify-between p-4 glass-card rounded-xl hover:border-white/20 transition-all border-l-2 border-l-primary-container/40">
+<div>
+<p class="serif-label">Recent Streak</p>
+<p class="text-xl font-headline font-bold">12 Days (Record)</p>
+</div>
+<span class="material-symbols-outlined text-2xl opacity-10" data-icon="timeline">timeline</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 glass-footer flex justify-around items-center h-20 pb-safe">
+<a class="flex flex-col items-center justify-center text-[#d1c5ac] opacity-50 active:scale-95 duration-300 hover:text-[#F5C518] hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined mb-1 text-2xl" data-icon="movie_filter">movie_filter</span>
+<span class="font-['Inter'] text-[9px] font-bold tracking-[0.15em] uppercase">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#d1c5ac] opacity-50 active:scale-95 duration-300 hover:text-[#F5C518] hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined mb-1 text-2xl" data-icon="auto_stories">auto_stories</span>
+<span class="font-['Inter'] text-[9px] font-bold tracking-[0.15em] uppercase">Watchlist</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#d1c5ac] opacity-50 active:scale-95 duration-300 hover:text-[#F5C518] hover:opacity-100 transition-all" href="#">
+<span class="material-symbols-outlined mb-1 text-2xl" data-icon="history_edu">history_edu</span>
+<span class="font-['Inter'] text-[9px] font-bold tracking-[0.15em] uppercase">Diary</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#F5C518] scale-105 transition-all active:scale-95" href="#">
+<div class="relative">
+<span class="material-symbols-outlined mb-1 text-2xl" data-icon="account_circle" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+<div class="absolute -top-1 -right-1 w-2 h-2 bg-primary-container rounded-full border border-[#131313]"></div>
+</div>
+<span class="font-['Inter'] text-[9px] font-bold tracking-[0.15em] uppercase">Profile</span>
+</a>
+</nav>
+</body></html>

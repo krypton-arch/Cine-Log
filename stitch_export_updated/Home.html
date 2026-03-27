@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CineLog — Your Private Cinema Archive</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#003641",
+              "on-error": "#690005",
+              "on-surface": "#e5e2e1",
+              "error-container": "#93000a",
+              "surface-container-high": "#2a2a2a",
+              "inverse-primary": "#745b00",
+              "secondary-container": "#59470c",
+              "on-tertiary-fixed-variant": "#004e5e",
+              "surface": "#0D0D0D",
+              "on-error-container": "#ffdad6",
+              "surface-container-highest": "#353534",
+              "tertiary-container": "#49dbff",
+              "outline-variant": "#4e4633",
+              "background": "#0D0D0D",
+              "on-secondary": "#3d2f00",
+              "surface-variant": "#353534",
+              "on-secondary-fixed-variant": "#56450a",
+              "error": "#ffb4ab",
+              "surface-container-lowest": "#0e0e0e",
+              "on-primary": "#3d2f00",
+              "secondary": "#dec47e",
+              "primary-container": "#F5C518",
+              "on-primary-fixed": "#241a00",
+              "primary-fixed": "#ffe08b",
+              "surface-dim": "#0D0D0D",
+              "inverse-surface": "#e5e2e1",
+              "on-primary-fixed-variant": "#584400",
+              "surface-container-low": "#1c1b1b",
+              "tertiary": "#bdefff",
+              "on-tertiary-fixed": "#001f27",
+              "on-secondary-container": "#d0b671",
+              "surface-container": "#201f1f",
+              "surface-tint": "#f0c110",
+              "on-surface-variant": "#d1c5ac",
+              "primary": "#ffe5a0",
+              "tertiary-fixed-dim": "#42d7fb",
+              "outline": "#9a9078",
+              "primary-fixed-dim": "#f0c110",
+              "on-background": "#e5e2e1",
+              "inverse-on-surface": "#313030",
+              "secondary-fixed": "#fce097",
+              "on-tertiary-container": "#005e70",
+              "secondary-fixed-dim": "#dec47e",
+              "surface-bright": "#3a3939",
+              "on-secondary-fixed": "#241a00",
+              "on-primary-container": "#695200",
+              "tertiary-fixed": "#b0ecff"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif", "serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>.film-grain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.035;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDTuWFtHBxcZVVF6ye6Qtqf1s56o7rrsLj22IKL08CtzZAEe1sRH5fHsGrMKaIIEiPu85V1oIyvmAXJ6LWJw58ulxPuM4SxR0lx5IyVhJuMuTCaTuPxkLEDF62rnB1UQYv_KBAPUyjmXDUbfR9Ntm0F4ZPlXSjKXtI3t03AxIhXy-E25-JE2pu7WhQN22UsPyq2l-t6DI_zMx4u217wjR1jxDTgmayi15XkE64eazKSFLUOnfwotr2NXp9Ogx9CAO0dU1eE2TORhlE)
+    }
+.no-scrollbar::-webkit-scrollbar {
+    display: none
+    }
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none
+    }
+.poster-glow {
+    box-shadow: inset 0 0 0 1px rgba(245, 197, 24, 0.1)
+    }
+.glass-panel {
+    background: rgba(42, 42, 42, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<div class="film-grain"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0D0D0D]/80 backdrop-blur-xl border-b border-white/5">
+<div class="flex items-center justify-between px-6 h-16 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#F5C518] scale-110" data-icon="local_movies">local_movies</span>
+<h1 class="text-xl font-bold tracking-[0.25em] text-[#F5C518] font-headline uppercase">CineLog</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="px-3 py-1 rounded-full glass-panel text-[#F5C518] text-[10px] font-bold font-label tracking-widest flex items-center gap-2 border border-[#F5C518]/20">
+                    128 XP • 7 <span class="material-symbols-outlined text-[12px]" data-icon="light_mode" style="font-variation-settings: 'FILL' 1;">light_mode</span>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary-container transition-colors" data-icon="search">search</button>
+</div>
+</div>
+</header>
+<main class="pt-20 pb-28 max-w-7xl mx-auto px-6">
+<!-- Hero Featured Section -->
+<section class="mb-12">
+<div class="flex items-baseline justify-between mb-8 border-b border-white/5 pb-4">
+<h2 class="font-headline text-4xl font-bold tracking-tight text-on-surface">Trending Now</h2>
+<span class="text-[9px] font-label uppercase tracking-[0.3em] text-on-surface-variant/40 italic">Archived Weekly</span>
+</div>
+<div class="flex overflow-x-auto no-scrollbar gap-5 snap-x pb-2">
+<!-- Movie Card 1 -->
+<div class="flex-none w-[260px] snap-start group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden poster-glow mb-4 bg-surface-container-highest">
+<img alt="" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="cinematic close-up of a vintage film projector in a dark room with dust motes dancing in the golden light beam" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMikVajU-EjTuSjHd-CsBGayOwPMqUFDGRkAeOP2Lhi1tKfff0FrNvFxxs3-fvMpqcDau_94ZnEEWu-CQt-078toEXj1GYfB_1qhliTx7rcKNLiUyKLeQMK_NqDWAg0SJw1uitWdUMF7K9vof-lBo9hJ8o35PlaYILsFz_1Kl4jP_QsTKVJlt4oSP6cJ9tjNMdn_BHvMRt3pyX1rLCZ-xCl38o7elPe00pK3OQnG1K6G41bLgz79TJ1NQ25DmHBNA-qKOYB_iDq0s"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-3 left-3">
+<span class="px-2 py-0.5 rounded-sm bg-primary-container text-on-primary text-[10px] font-bold font-label tracking-wider uppercase">8.4 Rating</span>
+</div>
+</div>
+<h3 class="font-headline text-xl text-on-surface mb-0.5 truncate font-semibold">Shadow of Memory</h3>
+<p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Noir • 1947 • 1h 42m</p>
+</div>
+<!-- Movie Card 2 -->
+<div class="flex-none w-[260px] snap-start group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden poster-glow mb-4 bg-surface-container-highest">
+<img alt="" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="wide shot of an abandoned futuristic neon-lit city street at night under heavy rain with deep shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCux9n1cjtPJYu0CmRf7Nrcjl6-xKqoRf36fbxmqC3iayjUkFvJ5mw9lZDm7hejaPNZYbJMz8RsHfd2BH4jT2EVEnVH-9qYdsVSq3Qi5PHDvRDmQm9_JBcENZlQGleNMSMoCqaIj5BDWmmXspfGAAa0h1SX631RbfsPdwHZMa9m35wDTyipUHS9hnrNqsSfTw_uWYCzgBcO_jSJQJ6WOjabS6h4vE8HzuyEt8m_qW4NqPJ7TUw28nyEGeyI86rizLnsKdSsX65gb70"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-3 left-3">
+<span class="px-2 py-0.5 rounded-sm bg-primary-container text-on-primary text-[10px] font-bold font-label tracking-wider uppercase">New Arrival</span>
+</div>
+</div>
+<h3 class="font-headline text-xl text-on-surface mb-0.5 truncate font-semibold">Neon Requiem</h3>
+<p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Sci-Fi • 2024 • 2h 15m</p>
+</div>
+<!-- Movie Card 3 -->
+<div class="flex-none w-[260px] snap-start group cursor-pointer">
+<div class="relative aspect-[2/3] rounded-lg overflow-hidden poster-glow mb-4 bg-surface-container-highest">
+<img alt="" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="abstract composition of red velvet theater curtains softly lit from below in a dramatic empty auditorium" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8stPcg4I15BYgz0xRl1NrJUi-mI-4OzwxCFXv7wz_io8kzPsgMSeNVAEH66NZ80SxlQFP7rK5VAatjYt3mYRFQ-SXyC8hq3mMxcU6SNyWuhKB4qRJgz3xuL5y13Gp5gNOiZKyFuoG5cn2mO8i2Ls4oZGZ3mfb7S_2RbisX1v4JcCp70Ic454UUGASftShH-9XWR8I4mpduWwxv12VOVmhsMmHgDBHH6Ym9xpQdQuhsoXBpMYynsPjuZGinLgwZ5TSSXJrK652ocI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface/80 via-transparent to-transparent"></div>
+</div>
+<h3 class="font-headline text-xl text-on-surface mb-0.5 truncate font-semibold">The Last Curtains</h3>
+<p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Drama • 2023 • 1h 58m</p>
+</div>
+</div>
+</section>
+<!-- Watchlist Nudge Card - Asymmetric Bento Pattern -->
+<section class="mb-12 grid md:grid-cols-12 gap-6">
+<div class="md:col-span-8 glass-panel rounded-xl p-8 flex flex-col md:flex-row gap-8 items-center border-l-4 border-primary-container shadow-2xl">
+<div class="flex-1 space-y-4">
+<div class="flex items-center gap-2 text-primary-container">
+<span class="material-symbols-outlined text-sm" data-icon="auto_stories">auto_stories</span>
+<span class="font-label text-[10px] uppercase tracking-[0.25em] font-bold">Watchlist Journey</span>
+</div>
+<h2 class="font-headline text-4xl font-bold leading-[1.1] tracking-tight">12 movies waiting — <span class="italic font-normal">here's one under 2hrs.</span></h2>
+<p class="text-on-surface-variant text-sm max-w-md font-body leading-relaxed">Based on your recent logs of 40s cinema, you might want to finally archive this masterpiece tonight.</p>
+<div class="pt-4 flex gap-4">
+<button class="px-6 py-3 rounded-lg bg-primary-container text-on-primary font-bold text-xs tracking-widest uppercase hover:opacity-90 transition-opacity">Watch Now</button>
+<button class="px-6 py-3 rounded-lg glass-panel text-on-surface font-bold text-xs tracking-widest uppercase hover:bg-white/10 transition-colors">Details</button>
+</div>
+</div>
+<div class="w-full md:w-44 aspect-[2/3] rounded-lg overflow-hidden poster-glow shadow-2xl shrink-0 rotate-1">
+<img alt="" class="w-full h-full object-cover" data-alt="moody black and white portrait of a man in a fedora standing under a streetlamp in a smoky alleyway" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBT6XirKMdhAy5V23qBqSFrFdNvZyFYLyUNxJ41eGNwGIndNrP0pE_1PW1aJEGIL8pBPF7mnNQrnhxwwpPIeaK35c3n7-5ctHVSooXAlZVwGhzgPz0OvrxleVkAdNfkXasFZNbC44iTsTSclGzP7uw_qwbheffYCOcIYd7QD9bA9k7Jj2Km_9Auh5JycS_PkQ3-A95ONJxXAFVGehi4rTgq-Ls_SNkPCzkmZnLDNIJW2K2Nb3egkEEn3F4nkivyPfc52Rn-OOVSQCc"/>
+</div>
+</div>
+<div class="md:col-span-4 grid grid-cols-2 md:grid-cols-1 gap-4">
+<div class="glass-panel rounded-xl p-6 flex flex-col justify-between border-b-2 border-primary-container/20">
+<span class="material-symbols-outlined text-primary-container text-2xl" data-icon="history_edu">history_edu</span>
+<div>
+<p class="text-4xl font-headline font-bold tracking-tight">42</p>
+<p class="text-[10px] font-label uppercase tracking-[0.2em] text-on-surface-variant/80">Films Logged</p>
+</div>
+</div>
+<div class="glass-panel rounded-xl p-6 flex flex-col justify-between border-b-2 border-primary-container/20">
+<span class="material-symbols-outlined text-primary-container text-2xl" data-icon="timer">timer</span>
+<div>
+<p class="text-4xl font-headline font-bold tracking-tight">8.4k</p>
+<p class="text-[10px] font-label uppercase tracking-[0.2em] text-on-surface-variant/80">Minutes Archive</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Secondary Feed: Recently Logged -->
+<section class="mb-12">
+<div class="flex items-baseline justify-between mb-8 border-b border-white/5 pb-4">
+<h2 class="font-headline text-3xl font-bold tracking-tight text-on-surface">Recent Journal Entries</h2>
+<button class="text-[9px] font-label uppercase tracking-[0.3em] text-[#F5C518] hover:text-[#f8d550] transition-colors">View Diary</button>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<!-- Entry 1 -->
+<div class="space-y-4">
+<div class="aspect-video rounded-lg overflow-hidden bg-surface-container-low group cursor-pointer relative">
+<img alt="" class="w-full h-full object-cover opacity-50 transition-opacity group-hover:opacity-70" data-alt="wide shot of a classic cinema marquee with warm yellow lights glowing against a dark blue twilight sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq41tkE9_fMoWgSQT_BSYjZ9FRuHkPu--MBAkMljA4b8XYwPPixPCp8498HXLP2Rr3U6XCQIG414Q6JqzfL9e0x6p4zbSwSeBkDcuyeHA4nQKNO7dCJFy6fAt2LnpgH2MnGN9OZt0BPZ9ZkrT5NyDI-0lytOo8HdNdlMLUq9-PBSaXUA8hx4zGSLnOtS-3AG0TDPFR3CT7_A58jSHE3jNMg2RQFvBj7XmToOPn98GQSHxnWyhesP8fYsQt2WCerBDC3uanvJeso3I"/>
+<div class="absolute inset-0 p-4 flex flex-col justify-end">
+<div class="flex gap-0.5 mb-1">
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[10px]" data-icon="star">star</span>
+</div>
+</div>
+</div>
+<div>
+<h4 class="font-headline text-xl font-bold mb-1.5">Paris, Texas</h4>
+<p class="text-sm text-on-surface-variant line-clamp-2 italic font-headline leading-relaxed">"The colors in the desert sequence are haunting. Wim Wenders captured a specific kind of loneliness..."</p>
+<p class="text-[9px] font-label uppercase tracking-widest mt-3 text-primary-container/50">Logged 2 days ago</p>
+</div>
+</div>
+<!-- Entry 2 -->
+<div class="space-y-4">
+<div class="aspect-video rounded-lg overflow-hidden bg-surface-container-low group cursor-pointer relative">
+<img alt="" class="w-full h-full object-cover opacity-50 transition-opacity group-hover:opacity-70" data-alt="close-up of 35mm film strips hanging in a laboratory with light passing through the translucent celluloid" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPFajKB-lEcqZlCc_XpHz_EacRP5fwwP_491j70u3FKSL5l5HVwyV8_6_FTqZdUFlpOkdFxivm4vOlYZFitlq8TsasDwiTu4BcQAPetr4mpjhGU4YlPM7rbMzlX0pjKjCjPofGRAoRs6pfTSOY4u0CxMwMWkjNGmhnp3G9-PgsbOSROdma7o2njKq-cP0bcSgaemhXB6LhfNGopeBZthiImPHSmR-4SWOKUWmIwFi3mQw70zmtblKSwBgOTD53FuvCrs1KuF-0eCw"/>
+<div class="absolute inset-0 p-4 flex flex-col justify-end">
+<div class="flex gap-0.5 mb-1">
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<div>
+<h4 class="font-headline text-xl font-bold mb-1.5">Stalker</h4>
+<p class="text-sm text-on-surface-variant line-clamp-2 italic font-headline leading-relaxed">"Tarkovsky's pacing is meditative. This wasn't a movie, it was a pilgrimage of the soul."</p>
+<p class="text-[9px] font-label uppercase tracking-widest mt-3 text-primary-container/50">Logged 1 week ago</p>
+</div>
+</div>
+<!-- Entry 3 -->
+<div class="space-y-4">
+<div class="aspect-video rounded-lg overflow-hidden bg-surface-container-low group cursor-pointer relative">
+<img alt="" class="w-full h-full object-cover opacity-50 transition-opacity group-hover:opacity-70" data-alt="silhouetted person walking alone through a wide modern art gallery with large blank canvases" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-_2--7tX8BAApH1oy69mZuBcG2ndmhHz--21jpkwlxYfEsstjLQl72NZEkUkxN87b-zFRn-bYRhL2AaPNyDUm4wEhJr27F9k31ZmCfJYagvo3sKxU5fm_3EB6KYgD3vRz0YZ24v7h2Ga2AmSKCC1V-pDPSBkAUm36sUYOfnfgKyCJmt-olfYjGt3Lr2obi2plqPrQoVBrSdnGTfaE5XCqvw-hGsVavb5tnfbB21LXwKVBiwwZPZOj77caq6JZGnakkurmV2epnYE"/>
+<div class="absolute inset-0 p-4 flex flex-col justify-end">
+<div class="flex gap-0.5 mb-1">
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary-container text-[10px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[10px]" data-icon="star">star</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[10px]" data-icon="star">star</span>
+</div>
+</div>
+</div>
+<div>
+<h4 class="font-headline text-xl font-bold mb-1.5">In the Mood for Love</h4>
+<p class="text-sm text-on-surface-variant line-clamp-2 italic font-headline leading-relaxed">"The sequences create such an intense atmosphere of longing."</p>
+<p class="text-[9px] font-label uppercase tracking-widest mt-3 text-primary-container/50">Logged Oct 12</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-[#0D0D0D]/80 backdrop-blur-xl border-t border-white/5">
+<div class="flex justify-around items-center h-20 w-full pb-safe max-w-2xl mx-auto">
+<button class="flex flex-col items-center justify-center text-[#F5C518] group">
+<span class="material-symbols-outlined text-2xl" data-icon="movie_filter">movie_filter</span>
+<span class="font-body text-[9px] font-bold tracking-[0.2em] uppercase mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-[#F5C518] transition-colors">
+<span class="material-symbols-outlined text-2xl" data-icon="auto_stories">auto_stories</span>
+<span class="font-body text-[9px] font-bold tracking-[0.2em] uppercase mt-1">Library</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-[#F5C518] transition-colors">
+<span class="material-symbols-outlined text-2xl" data-icon="history_edu">history_edu</span>
+<span class="font-body text-[9px] font-bold tracking-[0.2em] uppercase mt-1">Diary</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/60 hover:text-[#F5C518] transition-colors">
+<span class="material-symbols-outlined text-2xl" data-icon="account_circle">account_circle</span>
+<span class="font-body text-[9px] font-bold tracking-[0.2em] uppercase mt-1">Archive</span>
+</button>
+</div>
+</nav>
+<!-- FAB -->
+<button class="fixed right-6 bottom-24 w-12 h-12 bg-primary-container text-on-primary rounded-full shadow-2xl flex items-center justify-center group active:scale-95 transition-transform z-40">
+<span class="material-symbols-outlined transition-transform duration-500 group-hover:rotate-90 text-2xl" data-icon="add">add</span>
+</button>
+</body></html>

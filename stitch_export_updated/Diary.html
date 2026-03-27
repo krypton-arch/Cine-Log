@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#003641",
+              "on-error": "#690005",
+              "on-surface": "#e5e2e1",
+              "error-container": "#93000a",
+              "surface-container-high": "#2a2a2a",
+              "inverse-primary": "#745b00",
+              "secondary-container": "#59470c",
+              "on-tertiary-fixed-variant": "#004e5e",
+              "surface": "#131313",
+              "on-error-container": "#ffdad6",
+              "surface-container-highest": "#353534",
+              "tertiary-container": "#49dbff",
+              "outline-variant": "#4e4633",
+              "background": "#131313",
+              "on-secondary": "#3d2f00",
+              "surface-variant": "#353534",
+              "on-secondary-fixed-variant": "#56450a",
+              "error": "#ffb4ab",
+              "surface-container-lowest": "#0e0e0e",
+              "on-primary": "#3d2f00",
+              "secondary": "#dec47e",
+              "primary-container": "#f5c518",
+              "on-primary-fixed": "#241a00",
+              "primary-fixed": "#ffe08b",
+              "surface-dim": "#131313",
+              "inverse-surface": "#e5e2e1",
+              "on-primary-fixed-variant": "#584400",
+              "surface-container-low": "#1c1b1b",
+              "tertiary": "#bdefff",
+              "on-tertiary-fixed": "#001f27",
+              "on-secondary-container": "#d0b671",
+              "surface-container": "#201f1f",
+              "surface-tint": "#f0c110",
+              "on-surface-variant": "#d1c5ac",
+              "primary": "#ffe5a0",
+              "tertiary-fixed-dim": "#42d7fb",
+              "outline": "#9a9078",
+              "primary-fixed-dim": "#f0c110",
+              "on-background": "#e5e2e1",
+              "inverse-on-surface": "#313030",
+              "secondary-fixed": "#fce097",
+              "on-tertiary-container": "#005e70",
+              "secondary-fixed-dim": "#dec47e",
+              "surface-bright": "#3a3939",
+              "on-secondary-fixed": "#241a00",
+              "on-primary-container": "#695200",
+              "tertiary-fixed": "#b0ecff"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif", "serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .film-grain {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: url('https://grainy-gradients.vercel.app/noise.svg');
+        opacity: 0.03;
+        pointer-events: none;
+        z-index: 9999;
+      }
+      body {
+        background-color: #131313;
+        color: #e5e2e1;
+      }
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body selection:bg-primary-container selection:text-on-primary-container">
+<div class="film-grain"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#131313]/85 backdrop-blur-md shadow-[0_16px_32px_0_rgba(14,14,14,0.4)] flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#F5C518]" data-icon="local_movies">local_movies</span>
+<h1 class="text-2xl font-bold tracking-[-0.02em] text-[#F5C518] font-headline">CINELOG</h1>
+</div>
+<div class="text-[#F5C518] font-headline font-bold tracking-tight hover:opacity-80 transition-opacity cursor-pointer">
+            128 XP • 7 🔥
+        </div>
+</header>
+<main class="pt-24 pb-32 max-w-4xl mx-auto px-6">
+<!-- Diary Hero/Header -->
+<section class="mb-12">
+<h2 class="font-headline text-5xl md:text-6xl font-bold text-on-surface mb-4 tracking-tight">Diary</h2>
+<p class="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant max-w-md">
+                A chronological archive of your cinematic journey. Every frame remembered.
+            </p>
+</section>
+<!-- Stats Bento Mini -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+<div class="bg-surface-container-low p-6 rounded-lg">
+<span class="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">TOTAL LOGGED</span>
+<span class="block font-headline text-3xl font-bold text-primary-container">412</span>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg">
+<span class="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">THIS MONTH</span>
+<span class="block font-headline text-3xl font-bold text-on-surface">14</span>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg">
+<span class="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">MOST WATCHED</span>
+<span class="block font-headline text-xl font-bold text-on-surface truncate">Nolan</span>
+</div>
+<div class="bg-surface-container-low p-6 rounded-lg">
+<span class="block font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">AVG RATING</span>
+<span class="block font-headline text-3xl font-bold text-on-surface">4.2</span>
+</div>
+</div>
+<!-- October 2023 -->
+<section class="mb-20">
+<div class="flex items-baseline justify-between mb-8 border-l-4 border-primary-container pl-6">
+<h3 class="font-headline text-3xl font-bold">October 2023</h3>
+<span class="font-label text-xs text-on-surface-variant">12 MOVIES</span>
+</div>
+<div class="calendar-grid gap-2 md:gap-4">
+<!-- Day Labels -->
+<div class="text-center font-label text-[10px] uppercase tracking-tighter text-on-surface-variant pb-4">Mon</div>
+<div class="text-center font-label text-[10px] uppercase tracking-tighter text-on-surface-variant pb-4">Tue</div>
+<div class="text-center font-label text-[10px] uppercase tracking-tighter text-on-surface-variant pb-4">Wed</div>
+<div class="text-center font-label text-[10px] uppercase tracking-tighter text-on-surface-variant pb-4">Thu</div>
+<div class="text-center font-label text-[10px] uppercase tracking-tighter text-on-surface-variant pb-4">Fri</div>
+<div class="text-center font-label text-[10px] uppercase tracking-tighter text-on-surface-variant pb-4">Sat</div>
+<div class="text-center font-label text-[10px] uppercase tracking-tighter text-on-surface-variant pb-4">Sun</div>
+<!-- Empty days -->
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<div class="aspect-square"></div>
+<!-- Day 1: Watched -->
+<div class="aspect-square group relative rounded-lg overflow-hidden bg-surface-container-high transition-all duration-500 hover:z-10 hover:scale-105">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="dramatic cinematic movie poster aesthetic with dark moody lighting and classic typography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD04haa7txxwbkgyAwXjI8xIsv8FXDYxJVUgGEtE6p4K9bA_GF4ibG976TnLMu7uknzP7pPF6_qAvpXPnh4qEY44QJVP3IAbc5wQB5x9jPXST92ZvCH7S_3Fx1BqEmjhtFIGsHq0AKFx1k8bnSkZ0FIKGz1vW5oKXWcxpnTdTCK3NFBdycBrWFwBzwQKTWnLo3DcNMV2vuAlM8N91nAMH8rgFGnfOI1gR9Zqg_NEXJ6lwW4OrXM-xJGfs-lInI-ztD9w82iVdfOtU0"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-2 flex flex-col justify-end">
+<span class="text-[10px] font-bold text-white">01</span>
+</div>
+</div>
+<!-- Day 2-4: Empty -->
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg">
+<span class="text-[10px] text-outline opacity-40">02</span>
+</div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg">
+<span class="text-[10px] text-outline opacity-40">03</span>
+</div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg">
+<span class="text-[10px] text-outline opacity-40">04</span>
+</div>
+<!-- Day 5: Watched -->
+<div class="aspect-square group relative rounded-lg overflow-hidden bg-surface-container-high transition-all duration-500 hover:z-10 hover:scale-105">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="abstract black and white film frame with high contrast shadows and light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaE25TJKu5Cch-HE__UI72O4D4_Nu6M6J9X8-9OM1jY_1pwMpmPE_zwjTT1tE4L4zeLI4196E4lWoC3wwRLEgwFnJtyM2aoyL0SP4ZbO--2v3op7yHWHb5cLEizbMHqM1HM6cPr_XmJ3zLHbmJDv35gRgZxM-xOSeNLQZ_Omf2PlYzVr4k1JcMWlKfFjXzeVMGNg-6Oa9IRzcaJvks-1sKn3zfSrHqBHhF75usvST9R-da6eWLXa6bwNiOtcVoxTZCtv87gG2gY-M"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-2 flex flex-col justify-end">
+<span class="text-[10px] font-bold text-white">05</span>
+</div>
+</div>
+<!-- Continuous grid items for visual effect -->
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">06</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">07</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">08</span></div>
+<!-- Day 9: Double Feature -->
+<div class="aspect-square group relative rounded-lg overflow-hidden border-2 border-primary-container/30 bg-surface-container-high transition-all duration-500 hover:scale-105">
+<div class="grid grid-cols-2 h-full">
+<img class="h-full object-cover grayscale" data-alt="vintage cinema projector lens close up with golden light flare" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkdluvAGsaxOOQ9f031KMxI-uCWi24P9x4PyqshbHhyYgsK-F_CGpqBIaC9uAo8k78RbrM-Gn0kKZgBxj9CZW9ZlXkDu7qhGhTqfNJ1Tq5PrJpg21pAnXC6jVFqZhiAfpou58WPdktkVQBoXyoPnHI0V2maufvSx3nzU0H0G54uMRiMxrTPqtGCewftknrMgA2lqmf8xX1bIzIcRI9mZ8bkJZAqt_v5W2NAzd1IIj0tKfCs-xW1YAqqZTBA20iFlL2SuXZ_vWwH48"/>
+<img class="h-full object-cover grayscale" data-alt="silhouette of a filmmaker behind a camera in a noir setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVnwki6pdMWYSJycqNH_uTHmbv2kURfFxFPBIr4Myh2VnqnXrgI3O-p-5FHNdMuO1EhlzN4VUZ14AnMftJJarc8JVIplAknDKsN6Xdzu9RuSYVVP49CwepjA5Ok6DwLLfO_M3QMXLW-wOrE2ThpE26fA4jUMDZWXlAXoYQgf0X5_ilUL0PoHWt2R7OTxHkEe9lvPtlQFLzRuA9fTSiQGC6uFKWAXQ_TUnqltl2s1TcpeIF_ad-YK14qkTL8KlC8TyhmAZVmRuf_64"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-2 flex items-end">
+<span class="text-[10px] font-bold text-white">09</span>
+</div>
+</div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">10</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">11</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">12</span></div>
+<div class="aspect-square group relative rounded-lg overflow-hidden bg-surface-container-high transition-all duration-500 hover:scale-105">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="red theater curtains partially open with dramatic shadow depth" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwfAvotgCfzcNPIpKJuPdQTxDks97PO3EX6H8hQ1v3BbSSUfX10UDMikH322osmYFsfu3pe2TqA061w4yhb2sF15C7yl_KzE8rnADhMVbpUr8ZO-AeXBixWTyJ3cFaordvYHMJsQQC8J9m3Y-pSNGe3MBG1rs1pJhFCnOqykDEaJimE-ZVXyhLVvbYd1UF9yANmltutWs4BhDf-duHhMBbs1_lXjk0VUc-m6TAJaq4f4vxnJzrSE9zngMQoSDjycSnkCpgIKihkWo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-2 flex flex-col justify-end">
+<span class="text-[10px] font-bold text-white">13</span>
+</div>
+</div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">14</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">15</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">16</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">17</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">18</span></div>
+<div class="aspect-square flex items-center justify-center bg-surface-container-lowest/50 rounded-lg"><span class="text-[10px] text-outline opacity-40">19</span></div>
+<div class="aspect-square group relative rounded-lg overflow-hidden bg-surface-container-high transition-all duration-500 hover:scale-105">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" data-alt="moody neon lights reflecting on a rain-slicked city street at night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtPgdi7dDAKhL6dTuOf5ZgI2NiGSRugHMj4py5clMrIP0F2Fii5GW8JOGaKpyOPQY8PRl0T7gpBkYw-ECuXiMPHmX6kgeEBKQACGGeyLkM8VMrOv4FsYoWaXg7ANMEJlht_oPf7tD7hTJJ9Zg-4fC3rVNIUAndbTYg-QKxN-BLx1kzZTqAI-yA08yB4N_HPU726Uz4QQqriw1a_IN0g4Jb7Fmo7x2PDYJ6boGDPygqIUPMBdPCCsXG7BBLTBkGpfxiziYVYbk7yPM"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-2 flex flex-col justify-end">
+<span class="text-[10px] font-bold text-white">20</span>
+</div>
+</div>
+</div>
+</section>
+<!-- September 2023 -->
+<section class="mb-20">
+<div class="flex items-baseline justify-between mb-8 border-l-4 border-on-surface-variant pl-6 opacity-60">
+<h3 class="font-headline text-3xl font-bold">September 2023</h3>
+<span class="font-label text-xs text-on-surface-variant">28 MOVIES</span>
+</div>
+<div class="grid grid-cols-7 gap-2 md:gap-4 opacity-70 grayscale">
+<!-- Shortened view for preview -->
+<div class="aspect-square bg-surface-container-high rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="classic cinema seating in an old theater with red velvet" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUzDF5A7FJGKsUvt8MpZ73IXrPR4s3VOCev5OR5e4pSWWd2BEOJiB_FPGWsjqCkapP06Z1NFq43QCTdXmW7E0hV53ZiD4dKZ0xFQxc4AVSpkeMKPrVDcCSfRHDcRsripfg2m538wsI5RrSG_lkdGwlr6Edq513pIMosZ048UL4AfMdZhBApFpa2GAFQveFgoB4eh5rXZUuhNSothMES0H-92XhVvFk1JRsmSS5WZv3CPoUk-4JrobMDs3vXK-DHMvg9eZC4ZzneWY"/>
+</div>
+<div class="aspect-square bg-surface-container-high rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="close up of film reels on a shelf in a dark room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8k2wGWt3hcOdWZbM6lzSSlJrLocCC1Nv-t4pmoXIxBcNfUaoh8xzbrN7z54E2zEAnIcomGLBg75nFG4YPkreDakSalB0dJw5w2xttSTl-JTkvSLVb4YyX58o93wmzpEJskeNO4uNxfHvPQOqeJNWr59KVcgaIINGIMfnOwh19ezU7eLCD2mf6Ve1VZqx0ORE0BIKbBqc4_r0ZmeLTr8C_u5FODqTQuaE0QUu-faEfLlApDOv4hzzkbXr98YckbaIE2Mmg79xKYfw"/>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-lg"></div>
+<div class="aspect-square bg-surface-container-high rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="bright light shining through a film strip lens" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATdGp6HLfSQkiL8LLJSb0zUzqSgQiEpNjNnP43r9s5afdkXeegf-uacB0vKtS6YvyV1UBc3ZHBit0dNC7fFTgbVOnvXhFPw2P1LBA7sL6ZtV_0AfPxWFVGVm5nSeBvZtLsDVnbpIF4YhteU5b51Tw7DlHXQAN4SnPbpFeX5xbLWG8c91IhI29LGBz3Ue784i0WXenhSsW9mcqzwrT9kEIQuwJVtg3Kt8qipHvY1FCxZFLRJI6GJ_6nW4MXbSARpnNdJ7n8EbNynDo"/>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-lg"></div>
+<div class="aspect-square bg-surface-container-low rounded-lg"></div>
+<div class="aspect-square bg-surface-container-high rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="modern abstract movie poster with bold color palette" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDu5Uhxls4vCL__pxRPCZIPje6hjbOUbnArxoASjt2Va91fdpgmomUj2ocIuVdH5SWZP6XxuqiVX7sGTlzpeDF29Tmliyaav72M_n0zXCfoUlQTaVtSN-6lksq9jRUJ-lgpmQS2hL6ddObSHg7D4F6OmIZTVPyFiA5NGlxz7mn-EaxU2XdPtxbh8fcPBneOc8NuJTx3MpOY5EGuqcVUHcVp4ZtMWmAY_12TQLElU2NTq8JApntZRLjz3ubGsT8JjmnJ1WFABUg9cU"/>
+</div>
+</div>
+</section>
+<!-- Loading More Archive Placeholder -->
+<div class="flex flex-col items-center justify-center py-12">
+<div class="w-12 h-1 bg-surface-container-highest rounded-full mb-4"></div>
+<p class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Archiving August 2023...</p>
+</div>
+</main>
+<!-- FAB -->
+<button class="fixed right-6 bottom-24 bg-primary-container text-on-primary w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95 z-40">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-[#131313]/85 backdrop-blur-md rounded-t-lg shadow-[0_-16px_32px_0_rgba(14,14,14,0.4)] flex justify-around items-center h-20 w-full pb-safe">
+<div class="flex flex-col items-center justify-center text-[#d1c5ac] opacity-60 hover:text-[#F5C518] transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="movie_filter">movie_filter</span>
+<span class="font-body text-[10px] font-medium tracking-[0.1em] uppercase">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#d1c5ac] opacity-60 hover:text-[#F5C518] transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="auto_stories">auto_stories</span>
+<span class="font-body text-[10px] font-medium tracking-[0.1em] uppercase">Watchlist</span>
+</div>
+<!-- ACTIVE TAB: Diary -->
+<div class="flex flex-col items-center justify-center text-[#F5C518] scale-110 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="history_edu" style="font-variation-settings: 'FILL' 1;">history_edu</span>
+<span class="font-body text-[10px] font-medium tracking-[0.1em] uppercase">Diary</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#d1c5ac] opacity-60 hover:text-[#F5C518] transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="account_circle">account_circle</span>
+<span class="font-body text-[10px] font-medium tracking-[0.1em] uppercase">Profile</span>
+</div>
+</nav>
+</body></html>
