@@ -26,9 +26,9 @@ CineLog is a premium, high-end movie diary and library application for Android, 
 
 ## Download & Install (APK)
 
-You can download the latest pre-built **CineLog APK** from the [Releases](https://github.com/krypton-arch/Cine-Log/releases) page of this repository.
+You can download the latest pre-built **CineLog APK** directly from this repository.
 
-1. Download `app-debug.apk` to your Android device.
+1. Download [app-debug.apk](https://github.com/krypton-arch/Cine-Log/raw/main/app/build/outputs/apk/debug/app-debug.apk) to your Android device.
 2. Open the file to install (you may need to enable "Install from Unknown Sources" in your device settings).
 
 ## Building from Source
