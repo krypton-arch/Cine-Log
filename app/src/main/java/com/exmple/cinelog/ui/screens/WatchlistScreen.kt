@@ -106,7 +106,7 @@ fun WatchlistScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 24.dp)
-            .padding(top = 32.dp, bottom = 100.dp)
+            .padding(top = 32.dp, bottom = 16.dp)
     ) {
         // ── Header ──
         Text(
@@ -397,7 +397,9 @@ fun WatchlistMovieCard(
                                 letterSpacing = 1.sp,
                                 fontWeight = FontWeight.Bold
                             ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -429,7 +431,9 @@ fun WatchlistMovieCard(
                                 letterSpacing = 1.sp,
                                 fontWeight = FontWeight.Bold
                             ),
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -535,7 +539,9 @@ fun SearchResultCard(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
+                maxLines = 1,
+                softWrap = false
             )
         }
     }

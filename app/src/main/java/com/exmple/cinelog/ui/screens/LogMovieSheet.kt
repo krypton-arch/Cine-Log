@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
@@ -165,12 +166,15 @@ fun LogMovieSheet(
 
                 // Atmosphere Tags
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("ATMOSPHERE", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f))
+                    Text("TAGS", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
                     ) {
-                        listOf("Intense", "Mind-bending", "Visceral", "Masterpiece").forEach { tag ->
+                        val tags = movie.genres.split(",").filter { it.isNotBlank() }.take(5).map { it.trim() }
+                        val displayTags = if (tags.isNotEmpty()) tags else listOf("Intense", "Mind-bending", "Masterpiece")
+                        
+                        displayTags.forEach { tag ->
                             val isSelected = selectedAtmosphere == tag
                             Box(
                                 modifier = Modifier
@@ -207,7 +211,7 @@ fun LogMovieSheet(
                 }
 
                 // CTA
-                Column {
+                Column(modifier = Modifier.fillMaxWidth()) {
                     Button(
                         onClick = {
                             viewModel.logMovie(movie, wasOnWatchlist) {
@@ -219,10 +223,12 @@ fun LogMovieSheet(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                        ),
+                        contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("SAVE ARCHIVE ENTRY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp))
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                            Text("SAVE ARCHIVE ENTRY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp), maxLines = 1)
+                            Spacer(Modifier.width(8.dp))
                             Icon(Icons.Default.Done, contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     }

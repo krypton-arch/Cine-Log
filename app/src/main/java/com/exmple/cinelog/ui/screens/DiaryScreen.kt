@@ -60,7 +60,7 @@ fun DiaryScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface) // #131313 matching Noir
             .padding(horizontal = 24.dp)
-            .padding(top = 32.dp, bottom = 100.dp) // accommodate navbar
+            .padding(top = 32.dp, bottom = 16.dp) // accommodate navbar
     ) {
         // Top Header
         Text("Diary", style = MaterialTheme.typography.displaySmall)
@@ -194,7 +194,7 @@ fun DiaryScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 116.dp, end = 24.dp), // Adjust for navigation bar and padding
+                .padding(bottom = 16.dp, end = 24.dp), // Adjust for navigation bar and padding
             contentAlignment = Alignment.BottomEnd
         ) {
             FloatingActionButton(

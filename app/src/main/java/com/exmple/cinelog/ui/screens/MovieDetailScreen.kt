@@ -226,7 +226,7 @@ fun MovieDetailScreen(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Icon(Icons.Default.HistoryEdu, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onPrimary)
-                                Text("LOG TO DIARY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp), color = MaterialTheme.colorScheme.onPrimary)
+                                Text("LOG TO DIARY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp), color = MaterialTheme.colorScheme.onPrimary, maxLines = 1, softWrap = false)
                             }
                         }
 
@@ -253,7 +253,9 @@ fun MovieDetailScreen(
                                 Text(
                                     if (uiState.isInWatchlist) "ADDED TO LIBRARY" else "ADD TO LIBRARY",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp),
-                                    color = if (uiState.isInWatchlist) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (uiState.isInWatchlist) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
