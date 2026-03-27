@@ -10,6 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,38 +50,64 @@ fun LogMovieSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         containerColor = Color(0xFF131313), // Strict Surface Noir color
-        scrimColor = Color.Black.copy(alpha = 0.8f) // Immersive dark
+        scrimColor = Color.Black.copy(alpha = 0.8f), // Immersive dark
+        tonalElevation = 0.dp
     ) {
+        val scrollState = rememberScrollState()
+        
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
+                .padding(bottom = 32.dp)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Header Section
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.width(80.dp).aspectRatio(2f/3f).clip(RoundedCornerShape(8.dp))
-                )
-                Column {
-                    Text(
-                        text = movie.title.uppercase(),
-                        style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Black),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 2
+            // Header Section with Save Icon
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    AsyncImage(
+                        model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(60.dp)
+                            .aspectRatio(2f / 3f)
+                            .clip(RoundedCornerShape(8.dp))
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(movie.releaseYear.toString(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Box(modifier = Modifier.size(4.dp).background(MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(2.dp)))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (movie.runtime != null) "${movie.runtime} MIN" else "? MIN", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Column {
+                        Text(
+                            text = movie.title.uppercase(),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                letterSpacing = 1.sp,
+                                fontWeight = FontWeight.Black
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                        Text(
+                            movie.releaseYear ?: "",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
+                }
+                
+                // Quick Save Action in Header
+                IconButton(
+                    onClick = {
+                        viewModel.logMovie(movie, wasOnWatchlist) {
+                            onLogComplete()
+                        }
+                    },
+                    modifier = Modifier.glassSurface(cornerRadius = 12.dp, alpha = 0.5f)
+                ) {
+                    Icon(Icons.Default.Done, contentDescription = "Save", tint = MaterialTheme.colorScheme.primaryContainer)
                 }
             }
 
@@ -192,8 +222,8 @@ fun LogMovieSheet(
                         )
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("LOG TO DIARY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp))
-                            Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Text("SAVE ARCHIVE ENTRY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp))
+                            Icon(Icons.Default.Done, contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))

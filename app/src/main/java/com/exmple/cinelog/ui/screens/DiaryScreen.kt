@@ -23,6 +23,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
+import com.exmple.cinelog.ui.theme.bounceClick
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -30,6 +33,7 @@ import java.time.ZoneId
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiaryScreen(
+    onLogNewMovie: () -> Unit = {},
     viewModel: DiaryViewModel = viewModel(
         factory = DiaryViewModel.Factory(LocalContext.current.applicationContext as Application)
     )
@@ -183,6 +187,23 @@ fun DiaryScreen(
                         )
                     }
                 }
+            }
+        }
+        
+        // FAB for logging new movie
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 116.dp, end = 24.dp), // Adjust for navigation bar and padding
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            FloatingActionButton(
+                onClick = onLogNewMovie,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Log New Movie")
             }
         }
     }

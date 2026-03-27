@@ -121,7 +121,15 @@ fun CineLogNavHost(
                 )
             }
             composable(Screen.Diary.route) {
-                DiaryScreen()
+                DiaryScreen(
+                    onLogNewMovie = {
+                        navController.navigate(Screen.Watchlist.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             composable(Screen.Profile.route) {
                 ProfileScreen()
