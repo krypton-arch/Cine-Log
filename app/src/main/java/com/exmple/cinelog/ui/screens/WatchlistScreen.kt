@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.outlined.LocalMovies
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -233,7 +234,20 @@ fun WatchlistScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("📽️", style = MaterialTheme.typography.displayLarge)
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .glassSurface(cornerRadius = 50.dp, alpha = 0.2f)
+                            .border(1.dp, MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), RoundedCornerShape(50.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Outlined.LocalMovies,
+                            contentDescription = "Empty Archive",
+                            modifier = Modifier.size(44.dp),
+                            tint = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
                         "Your library is empty",
@@ -427,14 +441,14 @@ fun WatchlistMovieCard(
                                     .glassSurface(cornerRadius = 6.dp, alpha = 0.3f)
                             ) {
                                 Text(
-                                    genre.trim().uppercase(),
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = 9.sp,
-                                        letterSpacing = 1.sp,
-                                        fontWeight = FontWeight.Bold
+                                    genre.trim(),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontSize = 11.sp,
+                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                        letterSpacing = 0.5.sp
                                     ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
                                 )
                             }
                         }

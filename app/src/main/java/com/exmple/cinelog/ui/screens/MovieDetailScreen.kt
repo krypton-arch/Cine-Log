@@ -200,10 +200,13 @@ fun MovieDetailScreen(
                                     modifier = Modifier.glassSurface(cornerRadius = 16.dp, alpha = 0.3f)
                                 ) {
                                     Text(
-                                        genre.name.uppercase(),
+                                        genre.name,
                                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                            letterSpacing = 0.5.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
                                     )
                                 }
                             }

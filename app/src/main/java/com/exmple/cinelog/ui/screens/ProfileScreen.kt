@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -57,7 +58,7 @@ fun ProfileScreen(
             .padding(top = 32.dp, bottom = 100.dp)
     ) {
         // Hero: Level & Progress
-        Text("Current Status", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f))
+        Text("Current Status", style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp, fontStyle = FontStyle.Italic, letterSpacing = 2.sp), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f))
         Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.Bottom) {
             Text("Level $level: ", style = MaterialTheme.typography.displaySmall)
@@ -71,7 +72,7 @@ fun ProfileScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
         ) {
-            Text("XP PROGRESSION", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp))
+            Text("XP PROGRESSION", style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp, fontStyle = FontStyle.Italic, letterSpacing = 2.sp))
             Text("$userScore / $nextLevelXp XP", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primaryContainer, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -106,8 +107,8 @@ fun ProfileScreen(
 
         // Badge Showcase
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("Badge Showcase", style = MaterialTheme.typography.labelSmall)
-            Text("VIEW GALLERY", style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primaryContainer)
+            Text("Badge Showcase", style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontStyle = FontStyle.Italic, letterSpacing = 1.sp))
+            Text("VIEW GALLERY", style = MaterialTheme.typography.titleMedium.copy(fontSize = 12.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primaryContainer)
         }
         Spacer(modifier = Modifier.height(20.dp))
         
@@ -117,7 +118,7 @@ fun ProfileScreen(
             for (row in badges.chunked(3)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     row.forEach { badge ->
-                        ProfileBadgeCard(badge.name, badge.iconRes, badge.isUnlocked, modifier = Modifier.weight(1f))
+                        ProfileBadgeCard(badge.name, badge.badgeId, badge.isUnlocked, modifier = Modifier.weight(1f))
                     }
                     // Fill remaining slots
                     repeat(3 - row.size) {
@@ -136,14 +137,14 @@ fun ProfileStatCard(title: String, value: String, modifier: Modifier = Modifier)
             .glassCard(cornerRadius = 16.dp)
             .padding(24.dp)
     ) {
-        Text(title, style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp))
+        Text(title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp, fontStyle = FontStyle.Italic, letterSpacing = 1.5.sp))
         Spacer(modifier = Modifier.height(12.dp))
         Text(value, style = MaterialTheme.typography.headlineLarge)
     }
 }
 
 @Composable
-fun ProfileBadgeCard(name: String, emoji: String, isUnlocked: Boolean, modifier: Modifier = Modifier) {
+fun ProfileBadgeCard(name: String, badgeId: String, isUnlocked: Boolean, modifier: Modifier = Modifier) {
     val borderAlpha = if (isUnlocked) 0.12f else 0.03f
     val textColor = if (isUnlocked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
     
@@ -158,11 +159,32 @@ fun ProfileBadgeCard(name: String, emoji: String, isUnlocked: Boolean, modifier:
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(emoji, style = MaterialTheme.typography.headlineLarge)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(name, style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold), color = textColor, maxLines = 1)
+        val icon = getBadgeIcon(badgeId)
+        Icon(
+            imageVector = icon,
+            contentDescription = name,
+            tint = if (isUnlocked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+            modifier = Modifier.size(34.dp)
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(name, style = MaterialTheme.typography.titleSmall.copy(fontSize = 11.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp), color = textColor, maxLines = 1)
         if (!isUnlocked) {
-            Text("LOCKED", style = MaterialTheme.typography.labelSmall.copy(fontSize = 7.sp, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+            Spacer(modifier = Modifier.height(2.dp))
+            Text("LOCKED", style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp, fontStyle = FontStyle.Italic, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
         }
+    }
+}
+
+fun getBadgeIcon(badgeId: String): androidx.compose.ui.graphics.vector.ImageVector {
+    return when(badgeId) {
+        "first_log" -> Icons.Outlined.Theaters
+        "centurion" -> Icons.Outlined.WorkspacePremium
+        "horror_fiend" -> Icons.Outlined.Visibility
+        "old_soul" -> Icons.Outlined.SlowMotionVideo
+        "binge_king" -> Icons.Outlined.Weekend
+        "marathon" -> Icons.Outlined.DirectionsRun
+        "critic" -> Icons.Outlined.EditNote
+        "streak_7" -> Icons.Outlined.LocalFireDepartment
+        else -> Icons.Outlined.StarBorder
     }
 }
