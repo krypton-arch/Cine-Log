@@ -7,13 +7,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,6 +57,7 @@ fun WatchlistScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedMovieForLog by remember { mutableStateOf<WatchlistItemWithMovie?>(null) }
     var movieToRemove by remember { mutableStateOf<WatchlistItemWithMovie?>(null) }
+    var isGridView by remember { mutableStateOf(false) }
     
     // Log Movie Sheet
     if (selectedMovieForLog != null) {
@@ -242,20 +249,85 @@ fun WatchlistScreen(
             }
         } else {
             // ═══ WATCHLIST ITEMS ═══
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.animateContentSize()
             ) {
+                // Carousel Header
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    val highlights = watchlist.take(5)
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            "HIGHLIGHTS",
+                            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        )
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            items(items = highlights, key = { it.watchlistEntry.id }) { item ->
+                                WatchlistHighlightCard(
+                                    item = item,
+                                    onTap = { onMovieClick(item.movie.movieId) }
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                // Toggle Row
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "YOUR ARCHIVE",
+                            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.glassSurface(cornerRadius = 12.dp, alpha = 0.2f).padding(4.dp)
+                        ) {
+                            IconButton(
+                                onClick = { isGridView = false },
+                                modifier = Modifier.size(32.dp).background(
+                                    if (!isGridView) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
+                                    RoundedCornerShape(8.dp)
+                                )
+                            ) { Icon(Icons.Default.ViewList, contentDescription = "List", modifier = Modifier.size(18.dp), tint = if (!isGridView) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant) }
+                            IconButton(
+                                onClick = { isGridView = true },
+                                modifier = Modifier.size(32.dp).background(
+                                    if (isGridView) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
+                                    RoundedCornerShape(8.dp)
+                                )
+                            ) { Icon(Icons.Default.ViewModule, contentDescription = "Grid", modifier = Modifier.size(18.dp), tint = if (isGridView) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant) }
+                        }
+                    }
+                }
+
                 items(
                     items = watchlist,
-                    key = { it.watchlistEntry.id }
+                    key = { it.watchlistEntry.id },
+                    span = { if (isGridView) GridItemSpan(1) else GridItemSpan(maxLineSpan) }
                 ) { item ->
-                    WatchlistMovieCard(
-                        item = item,
-                        onTap = { onMovieClick(item.movie.movieId) },
-                        onLog = { selectedMovieForLog = item },
-                        onRemove = { movieToRemove = item }
-                    )
+                    if (isGridView) {
+                        WatchlistMovieGridCard(
+                            item = item,
+                            onTap = { onMovieClick(item.movie.movieId) },
+                            onLongPress = { selectedMovieForLog = item }
+                        )
+                    } else {
+                        WatchlistMovieCard(
+                            item = item,
+                            onTap = { onMovieClick(item.movie.movieId) },
+                            onLog = { selectedMovieForLog = item },
+                            onRemove = { movieToRemove = item }
+                        )
+                    }
                 }
             }
         }
@@ -575,5 +647,63 @@ fun SearchResultCard(
                 softWrap = false
             )
         }
+    }
+}
+
+// ═════════════════════════════════════════════════════════
+// Highlights Carousel Card (Cinematic Cover Flow)
+// ═════════════════════════════════════════════════════════
+
+@Composable
+fun WatchlistHighlightCard(
+    item: WatchlistItemWithMovie,
+    onTap: () -> Unit
+) {
+    val movie = item.movie
+    Box(
+        modifier = Modifier
+            .width(160.dp)
+            .aspectRatio(2f / 3f)
+            .glassCard(cornerRadius = 16.dp, alpha = 0.8f)
+            .bounceClick { onTap() }
+    ) {
+        AsyncImage(
+            model = "https://image.tmdb.org/t/p/w342${movie.posterPath}",
+            contentDescription = movie.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))
+        )
+    }
+}
+
+// ═════════════════════════════════════════════════════════
+// Grid View Poster Card
+// ═════════════════════════════════════════════════════════
+
+@Composable
+fun WatchlistMovieGridCard(
+    item: WatchlistItemWithMovie,
+    onTap: () -> Unit,
+    onLongPress: () -> Unit
+) {
+    val movie = item.movie
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(2f / 3f)
+            .glassCard(cornerRadius = 12.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = { onTap() },
+                    onLongPress = { onLongPress() }
+                )
+            }
+    ) {
+        AsyncImage(
+            model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
+            contentDescription = movie.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))
+        )
     }
 }
