@@ -34,6 +34,7 @@ import com.exmple.cinelog.ui.theme.bounceClick
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
 import com.exmple.cinelog.ui.theme.regalDivider
+import com.exmple.cinelog.ui.theme.shimmerEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,8 +162,38 @@ fun WatchlistScreen(
         if (searchQuery.isNotEmpty()) {
             // ═══ SEARCH RESULTS ═══
             if (isSearching) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primaryContainer)
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    repeat(5) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .glassCard(cornerRadius = 14.dp, alpha = 0.2f)
+                                .padding(14.dp),
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(70.dp)
+                                    .aspectRatio(2f / 3f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .shimmerEffect()
+                            )
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Box(modifier = Modifier.fillMaxWidth(0.75f).height(20.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                                Box(modifier = Modifier.fillMaxWidth(0.3f).height(14.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Box(modifier = Modifier.fillMaxWidth(0.9f).height(12.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                                Box(modifier = Modifier.fillMaxWidth(0.6f).height(12.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                            }
+                        }
+                    }
                 }
             } else if (searchResults.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

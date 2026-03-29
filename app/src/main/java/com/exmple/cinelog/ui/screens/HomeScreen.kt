@@ -115,7 +115,7 @@ fun HomeScreenRoute(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimary),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("OPEN LIBRARY", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp), maxLines = 1, softWrap = false)
+                        Text("OPEN LIBRARY", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp))
                     }
                 }
                 AsyncImage(

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -52,7 +53,25 @@ fun Modifier.glassCard(
     borderAlpha: Float = 0.08f
 ): Modifier = composed {
     val shape = RoundedCornerShape(cornerRadius)
+    
+    val transition = rememberInfiniteTransition(label = "glassGlow")
+    val offsetX by transition.animateFloat(
+        initialValue = -100f,
+        targetValue = 800f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(12000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glowX"
+    )
+
     this
+        .shadow(
+            elevation = 16.dp,
+            shape = shape,
+            ambientColor = GlassBorderLight,
+            spotColor = GlassBorderLight
+        )
         .clip(shape)
         .background(
             brush = Brush.verticalGradient(
@@ -75,14 +94,14 @@ fun Modifier.glassCard(
             shape = shape
         )
         .drawBehind {
-            // Inner glow — subtle radial warmth from top-left
+            // Inner glow — dynamic shifting radial warmth
             drawRoundRect(
                 brush = Brush.radialGradient(
                     colors = listOf(
                         GlassInnerGlow,
                         Color.Transparent
                     ),
-                    center = Offset(size.width * 0.2f, size.height * 0.15f),
+                    center = Offset(offsetX, size.height * 0.15f),
                     radius = size.width * 0.8f
                 ),
                 cornerRadius = CornerRadius(cornerRadius.toPx())

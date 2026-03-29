@@ -33,6 +33,7 @@ import coil.compose.AsyncImage
 import com.exmple.cinelog.ui.theme.bounceClick
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
+import com.exmple.cinelog.ui.theme.shimmerEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,8 +63,22 @@ fun MovieDetailScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primaryContainer)
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxWidth().height(420.dp).shimmerEffect())
+                Spacer(modifier = Modifier.height(24.dp))
+                Column(modifier = Modifier.padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                    Box(modifier = Modifier.fillMaxWidth(0.8f).height(40.dp).clip(RoundedCornerShape(8.dp)).shimmerEffect())
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(modifier = Modifier.width(60.dp).height(24.dp).clip(RoundedCornerShape(8.dp)).shimmerEffect())
+                        Box(modifier = Modifier.width(80.dp).height(24.dp).clip(RoundedCornerShape(8.dp)).shimmerEffect())
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(modifier = Modifier.fillMaxWidth().height(20.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                        Box(modifier = Modifier.fillMaxWidth().height(20.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                        Box(modifier = Modifier.fillMaxWidth(0.7f).height(20.dp).clip(RoundedCornerShape(4.dp)).shimmerEffect())
+                    }
+                    Box(modifier = Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(20.dp)).shimmerEffect())
+                }
             }
         } else if (uiState.error != null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -93,6 +108,14 @@ fun MovieDetailScreen(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
+                    
+                    val darkenAlpha = (scrollState.value / 600f).coerceIn(0f, 0.85f)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = darkenAlpha))
+                    )
+
                     // Gradient overlay from bottom
                     Box(
                         modifier = Modifier
@@ -226,7 +249,7 @@ fun MovieDetailScreen(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Icon(Icons.Default.HistoryEdu, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onPrimary)
-                                Text("LOG TO DIARY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp), color = MaterialTheme.colorScheme.onPrimary, maxLines = 1, softWrap = false)
+                                Text("LOG TO DIARY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp), color = MaterialTheme.colorScheme.onPrimary)
                             }
                         }
 
@@ -253,9 +276,7 @@ fun MovieDetailScreen(
                                 Text(
                                     if (uiState.isInWatchlist) "ADDED TO LIBRARY" else "ADD TO LIBRARY",
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp),
-                                    color = if (uiState.isInWatchlist) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    softWrap = false
+                                    color = if (uiState.isInWatchlist) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }

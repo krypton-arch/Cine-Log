@@ -26,6 +26,7 @@ import com.exmple.cinelog.ui.theme.glassSurface
 import com.exmple.cinelog.ui.theme.bounceClick
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Star
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -44,15 +45,16 @@ fun DiaryScreen(
     val today = LocalDate.now()
     val daysInMonth = today.lengthOfMonth()
     
-    // Convert logs list to a Map of Day -> PosterUrl
+    var selectedDayLogs by remember { mutableStateOf<List<com.exmple.cinelog.data.local.dao.LogWithMovie>?>(null) }
+
+    // Convert logs list to a Map of Day -> List of Logs
     val logMap = logs
         .filter {
             val logDate = Instant.ofEpochMilli(it.logEntry.watchDate).atZone(ZoneId.systemDefault()).toLocalDate()
             logDate.month == today.month && logDate.year == today.year
         }
-        .associateBy(
-            keySelector = { Instant.ofEpochMilli(it.logEntry.watchDate).atZone(ZoneId.systemDefault()).toLocalDate().dayOfMonth },
-            valueTransform = { it.movie.posterPath }
+        .groupBy(
+            keySelector = { Instant.ofEpochMilli(it.logEntry.watchDate).atZone(ZoneId.systemDefault()).toLocalDate().dayOfMonth }
         )
 
     Column(
@@ -143,18 +145,20 @@ fun DiaryScreen(
             }
             items(daysInMonth) { index ->
                 val day = index + 1
-                val poster = logMap[day]
+                val dayLogs = logMap[day]
 
-                if (poster != null) {
+                if (!dayLogs.isNullOrEmpty()) {
+                    val firstPoster = dayLogs.first().movie.posterPath
                     // Logged Day
                     Box(
                         modifier = Modifier
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(8.dp))
                             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .clickable { selectedDayLogs = dayLogs }
                     ) {
                         AsyncImage(
-                            model = "https://image.tmdb.org/t/p/w200$poster",
+                            model = "https://image.tmdb.org/t/p/w200$firstPoster",
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize(),
@@ -171,6 +175,21 @@ fun DiaryScreen(
                             modifier = Modifier.align(Alignment.BottomStart).padding(4.dp),
                             color = Color.White
                         )
+                        if (dayLogs.size > 1) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(4.dp)
+                                    .glassSurface(cornerRadius = 4.dp, alpha = 0.5f)
+                            ) {
+                                Text(
+                                    text = "+${dayLogs.size - 1}",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                                    color = Color.White,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                     }
                 } else {
                     // Empty Day
@@ -204,6 +223,83 @@ fun DiaryScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Log New Movie")
+            }
+        }
+    }
+
+    selectedDayLogs?.let { dayLogs ->
+        ModalBottomSheet(
+            onDismissRequest = { selectedDayLogs = null },
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)) }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                val logDate = Instant.ofEpochMilli(dayLogs.first().logEntry.watchDate).atZone(ZoneId.systemDefault()).toLocalDate()
+                val dateStr = "${logDate.month.name} ${logDate.dayOfMonth}, ${logDate.year}".uppercase()
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(dateStr, style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primaryContainer)
+                    Text("${dayLogs.size} FILMS", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(dayLogs.size) { index ->
+                        val logWithMovie = dayLogs[index]
+                        Box(
+                            modifier = Modifier
+                                .aspectRatio(2f/3f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        ) {
+                            AsyncImage(
+                                model = "https://image.tmdb.org/t/p/w200${logWithMovie.movie.posterPath}",
+                                contentDescription = logWithMovie.movie.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                            // Rating Overlay
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.BottomCenter)
+                                    .background(androidx.compose.ui.graphics.Brush.verticalGradient(
+                                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                                    ))
+                                    .padding(top = 24.dp, bottom = 8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.primaryContainer)
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = if (logWithMovie.logEntry.rating > 0) "${logWithMovie.logEntry.rating}" else "—",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
