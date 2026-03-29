@@ -27,14 +27,6 @@ val PlayfairDisplayFont = FontFamily(
     Font(googleFont = GoogleFont("Playfair Display"), fontProvider = provider, weight = FontWeight.Black),
 )
 
-// ── Regal Cursive Font ──
-val RegalCursiveFont = FontFamily(
-    Font(googleFont = GoogleFont("Dancing Script"), fontProvider = provider, weight = FontWeight.Normal),
-    Font(googleFont = GoogleFont("Dancing Script"), fontProvider = provider, weight = FontWeight.Medium),
-    Font(googleFont = GoogleFont("Dancing Script"), fontProvider = provider, weight = FontWeight.SemiBold),
-    Font(googleFont = GoogleFont("Dancing Script"), fontProvider = provider, weight = FontWeight.Bold)
-)
-
 // ── Clean Body Font ──
 val InterFont = FontFamily(
     Font(googleFont = GoogleFont("Inter"), fontProvider = provider, weight = FontWeight.Light),
