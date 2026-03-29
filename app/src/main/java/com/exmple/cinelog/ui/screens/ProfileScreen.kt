@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.exmple.cinelog.ui.theme.RegalCursiveFont
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
 
@@ -58,11 +59,11 @@ fun ProfileScreen(
             .padding(top = 32.dp, bottom = 100.dp)
     ) {
         // Hero: Level & Progress
-        Text("Current Status", style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp, fontStyle = FontStyle.Italic, letterSpacing = 2.sp), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f))
+        Text("Current Status", style = MaterialTheme.typography.titleMedium.copy(fontFamily = RegalCursiveFont, fontSize = 20.sp, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f))
         Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.Bottom) {
             Text("Level $level: ", style = MaterialTheme.typography.displaySmall)
-            Text(levelName, style = MaterialTheme.typography.displaySmall.copy(fontStyle = FontStyle.Italic), color = MaterialTheme.colorScheme.primaryContainer)
+            Text(levelName, style = MaterialTheme.typography.displaySmall.copy(fontFamily = RegalCursiveFont, fontSize = 42.sp), color = MaterialTheme.colorScheme.primaryContainer)
         }
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -72,7 +73,7 @@ fun ProfileScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
         ) {
-            Text("XP PROGRESSION", style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp, fontStyle = FontStyle.Italic, letterSpacing = 2.sp))
+            Text("XP PROGRESSION", style = MaterialTheme.typography.titleMedium.copy(fontFamily = RegalCursiveFont, fontSize = 20.sp, letterSpacing = 1.sp))
             Text("$userScore / $nextLevelXp XP", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primaryContainer, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -107,8 +108,8 @@ fun ProfileScreen(
 
         // Badge Showcase
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("Badge Showcase", style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp, fontStyle = FontStyle.Italic, letterSpacing = 1.sp))
-            Text("VIEW GALLERY", style = MaterialTheme.typography.titleMedium.copy(fontSize = 12.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primaryContainer)
+            Text("Badge Showcase", style = MaterialTheme.typography.titleLarge.copy(fontFamily = RegalCursiveFont, fontSize = 28.sp, letterSpacing = 0.5.sp))
+            Text("VIEW GALLERY", style = MaterialTheme.typography.titleMedium.copy(fontFamily = RegalCursiveFont, fontSize = 18.sp, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primaryContainer)
         }
         Spacer(modifier = Modifier.height(20.dp))
         
@@ -137,7 +138,7 @@ fun ProfileStatCard(title: String, value: String, modifier: Modifier = Modifier)
             .glassCard(cornerRadius = 16.dp)
             .padding(24.dp)
     ) {
-        Text(title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp, fontStyle = FontStyle.Italic, letterSpacing = 1.5.sp))
+        Text(title, style = MaterialTheme.typography.titleMedium.copy(fontFamily = RegalCursiveFont, fontSize = 20.sp, letterSpacing = 0.5.sp))
         Spacer(modifier = Modifier.height(12.dp))
         Text(value, style = MaterialTheme.typography.headlineLarge)
     }
@@ -167,10 +168,10 @@ fun ProfileBadgeCard(name: String, badgeId: String, isUnlocked: Boolean, modifie
             modifier = Modifier.size(34.dp)
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Text(name, style = MaterialTheme.typography.titleSmall.copy(fontSize = 11.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp), color = textColor, maxLines = 1)
+        Text(name, style = MaterialTheme.typography.titleSmall.copy(fontFamily = RegalCursiveFont, fontSize = 16.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp), color = textColor, maxLines = 1)
         if (!isUnlocked) {
             Spacer(modifier = Modifier.height(2.dp))
-            Text("LOCKED", style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp, fontStyle = FontStyle.Italic, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+            Text("LOCKED", style = MaterialTheme.typography.titleSmall.copy(fontFamily = RegalCursiveFont, fontSize = 14.sp, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
         }
     }
 }
