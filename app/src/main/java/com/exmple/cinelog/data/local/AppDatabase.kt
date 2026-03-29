@@ -10,6 +10,7 @@ import com.exmple.cinelog.data.local.dao.*
 import com.exmple.cinelog.data.local.entity.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @Database(
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
         Badge::class,
         Challenge::class
     ],
-    version = 2,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(DatabaseConverters::class)
@@ -43,7 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "cinelog_database"
                 )
-                .addCallback(SeedCallback())
+                .addCallback(SeedCallback(context))
                 .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
@@ -52,11 +53,21 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 
-    private class SeedCallback : Callback() {
+    private class SeedCallback(private val context: Context) : Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
-            INSTANCE?.let { database ->
-                CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.IO).launch {
+                seedDatabase(getDatabase(context))
+            }
+        }
+
+        override fun onOpen(db: SupportSQLiteDatabase) {
+            super.onOpen(db)
+            CoroutineScope(Dispatchers.IO).launch {
+                val database = getDatabase(context)
+                // Check if seeded - if no profile with ID 1, seed it.
+                val profile = database.userProfileDao().getUserProfile().firstOrNull()
+                if (profile == null) {
                     seedDatabase(database)
                 }
             }
@@ -66,7 +77,7 @@ abstract class AppDatabase : RoomDatabase() {
 
 suspend fun seedDatabase(db: AppDatabase) {
     // Seed initial user profile
-    db.userProfileDao().insertProfile(
+    db.userProfileDao().upsertProfile(
         UserProfile(
             id = 1,
             xp = 0,
@@ -149,6 +160,15 @@ suspend fun seedDatabase(db: AppDatabase) {
 
     // Seed challenges
     val challenges = listOf(
+        Challenge(
+            challengeId = "indie_films",
+            title = "Watch 5 Indie Films",
+            description = "Experience the raw essence of independent cinema this month.",
+            targetCount = 5,
+            currentCount = 0,
+            deadline = null,
+            isCompleted = false
+        ),
         Challenge(
             challengeId = "weekend_warrior",
             title = "Weekend Warrior",

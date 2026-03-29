@@ -74,7 +74,8 @@ class WatchlistViewModel(
                 posterPath = remoteMovie.poster_path,
                 releaseYear = remoteMovie.release_date?.take(4),
                 genres = "",
-                runtime = 0, // Fallbacks because search doesn't return these
+                runtime = 0,
+                director = null,
                 overview = remoteMovie.overview ?: ""
             )
             repository.addToWatchlist(movieEntity, priority)

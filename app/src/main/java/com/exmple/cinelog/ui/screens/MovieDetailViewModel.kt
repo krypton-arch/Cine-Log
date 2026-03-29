@@ -59,6 +59,7 @@ class MovieDetailViewModel(
                 releaseYear = detail.release_date?.take(4),
                 genres = detail.genres.joinToString(", ") { it.name },
                 runtime = detail.runtime,
+                director = detail.credits?.crew?.find { it.job == "Director" }?.name,
                 overview = detail.overview
             )
             repo.addToWatchlist(entity, Priority.CASUAL)
@@ -75,6 +76,7 @@ class MovieDetailViewModel(
             releaseYear = detail.release_date?.take(4),
             genres = detail.genres.joinToString(", ") { it.name },
             runtime = detail.runtime,
+            director = detail.credits?.crew?.find { it.job == "Director" }?.name,
             overview = detail.overview
         )
     }

@@ -45,7 +45,8 @@ interface MovieApiService {
     @GET("movie/{movie_id}")
     suspend fun getMovieDetails(
         @Path("movie_id") movieId: Int,
-        @Query("api_key") apiKey: String = BuildConfig.TMDB_API_KEY
+        @Query("api_key") apiKey: String = BuildConfig.TMDB_API_KEY,
+        @Query("append_to_response") appendToResponse: String = "credits"
     ): MovieDetailResponse
 }
 
@@ -77,7 +78,27 @@ data class MovieDetailResponse(
     val overview: String?,
     val vote_average: Double = 0.0,
     val runtime: Int?,
-    val genres: List<Genre> = emptyList()
+    val genres: List<Genre> = emptyList(),
+    val credits: MovieCreditsResponse? = null
+)
+
+data class MovieCreditsResponse(
+    val cast: List<CastMember> = emptyList(),
+    val crew: List<CrewMember> = emptyList()
+)
+
+data class CastMember(
+    val id: Int,
+    val name: String,
+    val character: String,
+    val profile_path: String?
+)
+
+data class CrewMember(
+    val id: Int,
+    val name: String,
+    val job: String,
+    val department: String
 )
 
 data class Genre(

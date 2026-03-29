@@ -178,6 +178,13 @@ class GamificationManager(
         
         activeChallenges.forEach { challenge ->
             val newCount = when (challenge.challengeId) {
+                "indie_films" -> {
+                    logs.count { 
+                        it.movie.genres.contains("Drama", ignoreCase = true) || 
+                        it.movie.genres.contains("Noir", ignoreCase = true) ||
+                        it.movie.genres.contains("Indie", ignoreCase = true)
+                    }
+                }
                 "weekend_warrior" -> {
                     val now = System.currentTimeMillis()
                     val weekAgo = now - 7 * 24 * 60 * 60 * 1000L

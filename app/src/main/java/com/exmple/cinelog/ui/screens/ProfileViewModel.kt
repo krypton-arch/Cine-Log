@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.entity.Badge
+import com.exmple.cinelog.data.local.entity.Challenge
 import com.exmple.cinelog.data.local.entity.UserProfile
 import com.exmple.cinelog.data.repository.GamificationRepository
 import com.exmple.cinelog.data.repository.LogRepository
@@ -24,7 +25,10 @@ data class ProfileUiState(
     val totalHours: Int = 0,
     val avgRating: Float = 0f,
     val totalFilms: Int = 0,
-    val topGenres: List<Pair<String, Float>> = emptyList()
+    val topGenres: List<Pair<String, Float>> = emptyList(),
+    val activeChallenge: Challenge? = null,
+    val favoriteDecade: String = "N/A",
+    val topDirector: String = "N/A"
 )
 
 class ProfileViewModel(
@@ -41,8 +45,9 @@ class ProfileViewModel(
             combine(
                 gamificationRepository.getUserProfile(),
                 gamificationRepository.getAllBadges(),
-                logRepository.getAllLogs()
-            ) { profile, badges, logs ->
+                logRepository.getAllLogs(),
+                gamificationRepository.getActiveChallenges()
+            ) { profile, badges, logs, challenges ->
                 
                 val levelName = profile?.level?.let { gamificationManager.getLevelName(it) } ?: "Cinephile"
                 
@@ -50,6 +55,9 @@ class ProfileViewModel(
                 var totalRating = 0f
                 var countWithRating = 0
                 val genreCounts = mutableMapOf<String, Int>()
+                val directorCounts = mutableMapOf<String, Int>()
+                val yearCounts = mutableMapOf<String, Int>()
+                val decadeCounts = mutableMapOf<Int, Int>()
 
                 logs.forEach { logWithMovie ->
                     totalMinutes += logWithMovie.movie.runtime ?: 0
@@ -61,6 +69,21 @@ class ProfileViewModel(
                     genresList.forEach { genre ->
                         genreCounts[genre] = genreCounts.getOrDefault(genre, 0) + 1
                     }
+
+                    val director = logWithMovie.movie.director
+                    if (!director.isNullOrBlank()) {
+                        directorCounts[director] = directorCounts.getOrDefault(director, 0) + 1
+                    }
+
+                    val yearStr = logWithMovie.movie.releaseYear
+                    if (!yearStr.isNullOrBlank()) {
+                        yearCounts[yearStr] = yearCounts.getOrDefault(yearStr, 0) + 1
+                        val year = yearStr.toIntOrNull()
+                        if (year != null && year > 1800) {
+                            val decade = (year / 10) * 10
+                            decadeCounts[decade] = decadeCounts.getOrDefault(decade, 0) + 1
+                        }
+                    }
                 }
 
                 val totalHours = totalMinutes / 60
@@ -70,6 +93,11 @@ class ProfileViewModel(
                     .take(4)
                     .map { it.key to (it.value.toFloat() / maxOf(1, genreCounts.values.sum())) * 100 }
 
+                val topYear = yearCounts.maxByOrNull { it.value }?.key ?: "NONE"
+                val topDirector = directorCounts.maxByOrNull { it.value }?.key ?: "NONE"
+                val favoriteDecade = decadeCounts.maxByOrNull { it.value }?.key?.let { "${it}s" } ?: "NONE"
+                val activeChallenge = challenges.firstOrNull()
+
                 ProfileUiState(
                     userProfile = profile,
                     levelName = levelName,
@@ -77,7 +105,10 @@ class ProfileViewModel(
                     totalHours = totalHours,
                     avgRating = avgRating,
                     totalFilms = logs.size,
-                    topGenres = topGenres
+                    topGenres = topGenres,
+                    activeChallenge = activeChallenge,
+                    favoriteDecade = favoriteDecade,
+                    topDirector = topDirector
                 )
             }.catch { /* Handle error */ }
             .collect { state ->
