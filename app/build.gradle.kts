@@ -16,8 +16,8 @@ android {
         applicationId = "com.exmple.cinelog"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.3"
         val tmdbKey = gradleLocalProperties(rootDir, providers).getProperty("TMDB_API_KEY") ?: ""
         val geminiProxyBaseUrl = gradleLocalProperties(rootDir, providers)
             .getProperty("GEMINI_PROXY_BASE_URL") ?: ""
