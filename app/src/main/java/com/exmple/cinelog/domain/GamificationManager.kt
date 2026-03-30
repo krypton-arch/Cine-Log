@@ -2,15 +2,17 @@ package com.exmple.cinelog.domain
 
 import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.UserProfile
-import com.exmple.cinelog.data.repository.GamificationRepository
+import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.LogRepository
 import kotlinx.coroutines.flow.firstOrNull
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-class GamificationManager(
-    private val gamificationRepository: GamificationRepository,
+import javax.inject.Inject
+
+class GamificationManager @Inject constructor(
+    private val archiveGamificationRepository: ArchiveGamificationRepository,
     private val logRepository: LogRepository
 ) {
 
@@ -52,7 +54,7 @@ class GamificationManager(
     }
 
     suspend fun processMovieLog(logEntry: LogEntry, hasReview: Boolean, wasOnWatchlist: Boolean) {
-        val currentProfile = gamificationRepository.getUserProfile().firstOrNull() ?: UserProfile(
+        val currentProfile = archiveGamificationRepository.getUserProfile().firstOrNull() ?: UserProfile(
             xp = 0, level = 1, currentStreak = 0, lastLogDate = null,
             totalFilmsWatched = 0, totalMinutesWatched = 0
         )
@@ -95,14 +97,14 @@ class GamificationManager(
             totalMinutesWatched = totalMinutes
         )
 
-        gamificationRepository.updateProfile(updatedProfile)
+        archiveGamificationRepository.updateProfile(updatedProfile)
         checkBadges(updatedProfile)
     }
 
     suspend fun checkBadges(profile: UserProfile? = null) {
-        val unlockedBadges = gamificationRepository.getUnlockedBadges().firstOrNull()?.map { it.badgeId } ?: emptyList()
+        val unlockedBadges = archiveGamificationRepository.getUnlockedBadges().firstOrNull()?.map { it.badgeId } ?: emptyList()
         val logs = logRepository.getAllLogs().firstOrNull() ?: emptyList()
-        val currentProfile = profile ?: gamificationRepository.getUserProfile().firstOrNull() ?: return
+        val currentProfile = profile ?: archiveGamificationRepository.getUserProfile().firstOrNull() ?: return
 
         // First Frame (1 film)
         if ("first_log" !in unlockedBadges && logs.isNotEmpty()) {
@@ -156,16 +158,16 @@ class GamificationManager(
     }
 
     private suspend fun unlockBadge(badgeId: String) {
-        val badges = gamificationRepository.getAllBadges().firstOrNull() ?: return
+        val badges = archiveGamificationRepository.getAllBadges().firstOrNull() ?: return
         val badge = badges.find { it.badgeId == badgeId } ?: return
         if (badge.isUnlocked) return // Already unlocked
         
-        gamificationRepository.unlockBadge(badge)
+        archiveGamificationRepository.unlockBadge(badge)
 
-        val profile = gamificationRepository.getUserProfile().firstOrNull()
+        val profile = archiveGamificationRepository.getUserProfile().firstOrNull()
         if (profile != null) {
             val newXp = profile.xp + XP_UNLOCK_BADGE
-            gamificationRepository.updateProfile(profile.copy(
+            archiveGamificationRepository.updateProfile(profile.copy(
                 xp = newXp,
                 level = calculateLevel(newXp)
             ))
@@ -173,7 +175,7 @@ class GamificationManager(
     }
 
     suspend fun checkChallenges() {
-        val activeChallenges = gamificationRepository.getActiveChallenges().firstOrNull() ?: return
+        val activeChallenges = archiveGamificationRepository.getActiveChallenges().firstOrNull() ?: return
         val logs = logRepository.getAllLogs().firstOrNull() ?: emptyList()
         
         activeChallenges.forEach { challenge ->
@@ -202,10 +204,10 @@ class GamificationManager(
                 else -> challenge.currentCount
             }
             
-            gamificationRepository.updateChallengeProgress(challenge, minOf(newCount, challenge.targetCount))
+            archiveGamificationRepository.updateChallengeProgress(challenge, minOf(newCount, challenge.targetCount))
             
             if (newCount >= challenge.targetCount && !challenge.isCompleted) {
-                gamificationRepository.completeChallenge(challenge)
+                archiveGamificationRepository.completeChallenge(challenge)
             }
         }
     }

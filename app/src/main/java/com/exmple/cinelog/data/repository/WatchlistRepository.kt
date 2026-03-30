@@ -8,10 +8,11 @@ import com.exmple.cinelog.data.local.entity.Priority
 import com.exmple.cinelog.data.local.entity.WatchlistEntry
 import kotlinx.coroutines.flow.Flow
 
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class WatchlistRepository(
+class WatchlistRepository @Inject constructor(
     private val watchlistDao: WatchlistDao,
     private val movieDao: MovieDao
 ) {

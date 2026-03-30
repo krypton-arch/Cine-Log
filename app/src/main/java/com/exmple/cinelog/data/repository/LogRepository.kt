@@ -7,10 +7,11 @@ import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.MovieEntity
 import kotlinx.coroutines.flow.Flow
 
+import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LogRepository(
+class LogRepository @Inject constructor(
     private val logDao: LogDao,
     private val movieDao: MovieDao
 ) {

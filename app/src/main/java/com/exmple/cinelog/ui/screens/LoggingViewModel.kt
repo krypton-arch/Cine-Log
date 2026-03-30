@@ -1,14 +1,11 @@
 package com.exmple.cinelog.ui.screens
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.MovieEntity
-import com.exmple.cinelog.data.repository.GamificationRepository
 import com.exmple.cinelog.data.repository.LogRepository
 import com.exmple.cinelog.domain.GamificationManager
 import kotlinx.coroutines.flow.MutableStateFlow

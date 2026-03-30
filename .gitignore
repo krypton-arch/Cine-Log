@@ -14,5 +14,7 @@
 .cxx
 local.properties
 *.log
+*_output.txt
+*.idsig
 .worktrees/
 gemini-relay/.env

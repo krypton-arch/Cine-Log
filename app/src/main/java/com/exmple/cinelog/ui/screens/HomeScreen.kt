@@ -1,6 +1,5 @@
 package com.exmple.cinelog.ui.screens
 
-import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -30,8 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.exmple.cinelog.data.remote.RemoteMovie
 import com.exmple.cinelog.ui.theme.bounceClick
@@ -56,8 +53,6 @@ fun HomeScreenRoute(
     val topRatedMovies by viewModel.topRatedMovies.collectAsState()
     val totalFilms by viewModel.totalFilmsLogged.collectAsState()
     val totalMinutes by viewModel.totalMinutesLogged.collectAsState()
-    val watchlistCount by viewModel.watchlistCount.collectAsState()
-
     val watchlistCount by viewModel.watchlistCount.collectAsState()
 
     Scaffold(
@@ -187,6 +182,7 @@ fun HomeScreenRoute(
         )
 
         Spacer(modifier = Modifier.height(60.dp)) // Bottom nav clearance
+        }
     }
 }
 
