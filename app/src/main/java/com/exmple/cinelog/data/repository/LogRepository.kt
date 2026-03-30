@@ -32,7 +32,7 @@ class LogRepository @Inject constructor(
     }
 
     suspend fun logMovie(movie: MovieEntity, logEntry: LogEntry) {
-        movieDao.insertMovie(movie)
+        movieDao.upsertMovie(movie)
         logDao.insertLog(logEntry)
     }
 }

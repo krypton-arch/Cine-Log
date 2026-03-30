@@ -94,12 +94,14 @@ Dependency injection via Hilt. All repositories and `GamificationManager` are `@
 
 ## Download
 
-### [CineLog-v2.3-PublicRelay.apk](https://github.com/krypton-arch/Cine-Log/blob/main/releases/CineLog-v2.3-PublicRelay.apk)
+### [CineLog-v2.4-WatchlistFix.apk](https://github.com/krypton-arch/Cine-Log/blob/main/releases/CineLog-v2.4-WatchlistFix.apk)
 
 1. Download to your Android device (7.0+, API 24).
 2. Allow installs from unknown sources if prompted.
-3. The Projectionist's Booth runs on a hosted Gemini relay — no API key needed on your device.
-4. Your entire archive lives on-device. Back it up before switching phones.
+3. The Projectionist's Booth runs on the hosted Gemini relay, so no API key is needed on your device.
+4. This release fixes a library bug where newly added watchlist titles could fail to appear in the Library screen.
+5. The APK is signed with the Android debug keystore, not a production release key.
+6. Your entire archive lives on-device. Back it up before switching phones.
 
 ---
 

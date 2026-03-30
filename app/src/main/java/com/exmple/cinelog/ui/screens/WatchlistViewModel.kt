@@ -1,11 +1,10 @@
 package com.exmple.cinelog.ui.screens
 
-import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.dao.WatchlistItemWithMovie
 import com.exmple.cinelog.data.local.entity.MovieEntity
 import com.exmple.cinelog.data.local.entity.Priority
@@ -41,7 +40,10 @@ class WatchlistViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             repository.getAllWatchlistItems()
-                .catch { /* Error handling */ }
+                .catch { error ->
+                    Log.e("WatchlistViewModel", "Failed to load watchlist", error)
+                    _watchlist.value = emptyList()
+                }
                 .collect { items ->
                     _watchlist.value = items
                 }
@@ -61,6 +63,7 @@ class WatchlistViewModel @Inject constructor(
                 val response = apiService.searchMovies(query)
                 _searchResults.value = response.results
             } catch (e: Exception) {
+                Log.e("WatchlistViewModel", "Movie search failed", e)
                 _searchResults.value = emptyList()
             } finally {
                 _isSearching.value = false
@@ -80,7 +83,11 @@ class WatchlistViewModel @Inject constructor(
                 director = null,
                 overview = remoteMovie.overview ?: ""
             )
-            repository.addToWatchlist(movieEntity, priority)
+            runCatching {
+                repository.addToWatchlist(movieEntity, priority)
+            }.onFailure { error ->
+                Log.e("WatchlistViewModel", "Failed to add movie to watchlist", error)
+            }
         }
     }
     

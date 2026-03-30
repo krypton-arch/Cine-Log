@@ -1,15 +1,14 @@
 package com.exmple.cinelog.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import com.exmple.cinelog.data.local.entity.MovieEntity
 
 @Dao
 interface MovieDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMovie(movie: MovieEntity)
+    @Upsert
+    suspend fun upsertMovie(movie: MovieEntity)
 
     @Query("SELECT * FROM movies WHERE movieId = :id")
     suspend fun getMovieById(id: Int): MovieEntity?
