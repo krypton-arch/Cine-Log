@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: cinelog-gemini-relay
+    runtime: node
+    plan: free
+    rootDir: gemini-relay
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeployTrigger: off
+    buildFilter:
+      paths:
+        - gemini-relay/**
+        - render.yaml
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ALLOW_ORIGIN
+        value: "*"
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash

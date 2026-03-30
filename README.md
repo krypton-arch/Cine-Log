@@ -6,6 +6,8 @@ CineLog is a premium Android film diary and personal movie archive for people wh
 
 ![App Icon](app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/krypton-arch/Cine-Log)
+
 ---
 
 ## What CineLog Includes
@@ -99,6 +101,18 @@ Then build:
 ```
 
 The Android app no longer expects a Gemini secret locally. Keep `GEMINI_API_KEY` on the relay server only, and point the app at that relay with `GEMINI_PROXY_BASE_URL`.
+
+### Deploy The Relay
+
+Use the Render button above or create a new Blueprint in Render from this repository. The included [render.yaml](/D:/AndroidStudioProjects/CineLog/render.yaml) provisions the `gemini-relay` service and prompts you for `GEMINI_API_KEY` as a secret during first deploy.
+
+After Render gives you a public URL like `https://your-service.onrender.com`, set:
+
+```properties
+GEMINI_PROXY_BASE_URL=https://your-service.onrender.com
+```
+
+Then rebuild the APK so any mobile device can use the Projectionist's Booth without talking to your local machine. The Blueprint has auto-deploys turned off on purpose, which matches Render's current recommendation for Deploy to Render flows.
 
 ---
 
