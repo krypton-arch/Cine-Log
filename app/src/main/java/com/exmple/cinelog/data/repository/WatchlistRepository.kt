@@ -39,4 +39,8 @@ class WatchlistRepository(
     suspend fun removeFromWatchlist(entry: WatchlistEntry) {
         watchlistDao.deleteWatchlistEntry(entry)
     }
+
+    fun getWatchlistCount(): Flow<Int> {
+        return watchlistDao.getWatchlistCount()
+    }
 }

@@ -3,18 +3,26 @@ package com.exmple.cinelog.ui.screens
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.remote.RemoteMovie
 import com.exmple.cinelog.data.remote.RetrofitClient
+import com.exmple.cinelog.data.repository.LogRepository
+import com.exmple.cinelog.data.repository.WatchlistRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val application: Application) : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val logRepository: LogRepository,
+    private val watchlistRepository: WatchlistRepository
+) : ViewModel() {
 
     private val _trendingMovies = MutableStateFlow<List<RemoteMovie>>(emptyList())
     val trendingMovies: StateFlow<List<RemoteMovie>> = _trendingMovies.asStateFlow()
@@ -77,31 +85,21 @@ class HomeViewModel(private val application: Application) : ViewModel() {
     }
 
     private fun loadLocalStats() {
-        val db = AppDatabase.getDatabase(application)
         viewModelScope.launch {
-            db.logDao().getTotalFilmsWatched()
+            logRepository.getTotalFilmsWatched()
                 .catch { /* ignore */ }
                 .collect { _totalFilmsLogged.value = it }
         }
         viewModelScope.launch {
-            db.logDao().getTotalMinutesWatched()
+            logRepository.getTotalMinutesWatched()
                 .catch { /* ignore */ }
                 .collect { _totalMinutesLogged.value = it ?: 0 }
         }
         viewModelScope.launch {
-            db.watchlistDao().getWatchlistCount()
+            watchlistRepository.getWatchlistCount()
                 .catch { /* ignore */ }
                 .collect { _watchlistCount.value = it }
         }
     }
 
-    class Factory(private val application: Application) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return HomeViewModel(application) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
 }

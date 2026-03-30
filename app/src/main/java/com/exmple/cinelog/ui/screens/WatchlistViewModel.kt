@@ -2,8 +2,9 @@ package com.exmple.cinelog.ui.screens
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.dao.WatchlistItemWithMovie
 import com.exmple.cinelog.data.local.entity.MovieEntity
@@ -20,7 +21,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class WatchlistViewModel(
+@HiltViewModel
+class WatchlistViewModel @Inject constructor(
     private val repository: WatchlistRepository,
     private val apiService: MovieApiService = RetrofitClient.apiService
 ) : ViewModel() {
@@ -88,15 +90,4 @@ class WatchlistViewModel(
         }
     }
 
-    class Factory(private val application: Application) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(WatchlistViewModel::class.java)) {
-                val db = AppDatabase.getDatabase(application)
-                val repository = WatchlistRepository(db.watchlistDao(), db.movieDao())
-                @Suppress("UNCHECKED_CAST")
-                return WatchlistViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
 }

@@ -2,8 +2,9 @@ package com.exmple.cinelog.ui.screens
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.MovieEntity
@@ -16,7 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
 
-class LoggingViewModel(
+@HiltViewModel
+class LoggingViewModel @Inject constructor(
     private val logRepository: LogRepository,
     private val gamificationManager: GamificationManager
 ) : ViewModel() {
@@ -75,17 +77,4 @@ class LoggingViewModel(
         }
     }
 
-    class Factory(private val application: Application) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(LoggingViewModel::class.java)) {
-                val db = AppDatabase.getDatabase(application)
-                val logRepo = LogRepository(db.logDao(), db.movieDao())
-                val gamificationRepo = GamificationRepository(db.gamificationDao(), db.userProfileDao())
-                val gamificationManager = GamificationManager(gamificationRepo, logRepo)
-                @Suppress("UNCHECKED_CAST")
-                return LoggingViewModel(logRepo, gamificationManager) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
 }

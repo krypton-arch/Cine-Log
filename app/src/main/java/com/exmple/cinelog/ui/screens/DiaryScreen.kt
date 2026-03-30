@@ -31,13 +31,13 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiaryScreen(
     onLogNewMovie: () -> Unit = {},
-    viewModel: DiaryViewModel = viewModel(
-        factory = DiaryViewModel.Factory(LocalContext.current.applicationContext as Application)
-    )
+    viewModel: DiaryViewModel = hiltViewModel()
 ) {
     val logs by viewModel.logs.collectAsState()
     

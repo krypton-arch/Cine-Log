@@ -43,13 +43,13 @@ import com.exmple.cinelog.ui.theme.glassSurface
 import com.exmple.cinelog.ui.theme.regalDivider
 import com.exmple.cinelog.ui.theme.shimmerEffect
 
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchlistScreen(
     onMovieClick: (Int) -> Unit = {},
-    viewModel: WatchlistViewModel = viewModel(
-        factory = WatchlistViewModel.Factory(LocalContext.current.applicationContext as Application)
-    )
+    viewModel: WatchlistViewModel = hiltViewModel()
 ) {
     val watchlist by viewModel.watchlist.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()

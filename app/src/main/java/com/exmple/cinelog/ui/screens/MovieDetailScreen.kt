@@ -35,15 +35,14 @@ import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
 import com.exmple.cinelog.ui.theme.shimmerEffect
 
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailScreen(
     movieId: Int,
     onBack: () -> Unit,
-    viewModel: MovieDetailViewModel = viewModel(
-        key = "detail_$movieId",
-        factory = MovieDetailViewModel.Factory(movieId, LocalContext.current.applicationContext as Application)
-    )
+    viewModel: MovieDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showLogSheet by remember { mutableStateOf(false) }

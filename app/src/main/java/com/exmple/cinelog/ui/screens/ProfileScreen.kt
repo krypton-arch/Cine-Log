@@ -29,12 +29,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.exmple.cinelog.data.local.entity.Badge
 import com.exmple.cinelog.ui.theme.PlayfairDisplayFont
 
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel(
-        factory = ProfileViewModel.Factory(LocalContext.current.applicationContext as Application)
-    )
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val userScore = uiState.userProfile?.xp ?: 0

@@ -40,12 +40,12 @@ import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
 import com.exmple.cinelog.ui.theme.regalDivider
 
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenRoute(
-    viewModel: HomeViewModel = viewModel(
-        factory = HomeViewModel.Factory(LocalContext.current.applicationContext as Application)
-    ),
+    viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToWatchlist: () -> Unit,
     onMovieClick: (Int) -> Unit = {},
 ) {

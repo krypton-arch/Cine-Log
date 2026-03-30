@@ -2,8 +2,9 @@ package com.exmple.cinelog.ui.screens
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.entity.Badge
 import com.exmple.cinelog.data.local.entity.Challenge
@@ -31,7 +32,8 @@ data class ProfileUiState(
     val topDirector: String = "N/A"
 )
 
-class ProfileViewModel(
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
     private val gamificationRepository: GamificationRepository,
     private val logRepository: LogRepository,
     private val gamificationManager: GamificationManager
@@ -117,17 +119,4 @@ class ProfileViewModel(
         }
     }
 
-    class Factory(private val application: Application) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
-                val db = AppDatabase.getDatabase(application)
-                val gamificationRepo = GamificationRepository(db.gamificationDao(), db.userProfileDao())
-                val logRepo = LogRepository(db.logDao(), db.movieDao())
-                val gamificationManager = GamificationManager(gamificationRepo, logRepo)
-                @Suppress("UNCHECKED_CAST")
-                return ProfileViewModel(gamificationRepo, logRepo, gamificationManager) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
 }

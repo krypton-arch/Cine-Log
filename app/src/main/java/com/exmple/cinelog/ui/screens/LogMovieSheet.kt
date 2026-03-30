@@ -33,14 +33,14 @@ import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
 import java.time.LocalDate
 
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogMovieSheet(
     movie: MovieEntity,
     wasOnWatchlist: Boolean = false,
-    viewModel: LoggingViewModel = viewModel(
-        factory = LoggingViewModel.Factory(LocalContext.current.applicationContext as Application)
-    ),
+    viewModel: LoggingViewModel = hiltViewModel(),
     onLogComplete: () -> Unit,
     onDismissRequest: () -> Unit
 ) {

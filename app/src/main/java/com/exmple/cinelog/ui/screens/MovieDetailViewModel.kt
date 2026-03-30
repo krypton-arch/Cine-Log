@@ -1,10 +1,11 @@
 package com.exmple.cinelog.ui.screens
 
-import android.app.Application
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.entity.MovieEntity
 import com.exmple.cinelog.data.remote.MovieDetailResponse
@@ -23,10 +24,12 @@ data class MovieDetailUiState(
     val error: String? = null
 )
 
-class MovieDetailViewModel(
-    private val movieId: Int,
-    private val application: Application
+@HiltViewModel
+class MovieDetailViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val watchlistRepository: WatchlistRepository
 ) : ViewModel() {
+    private val movieId: Int = checkNotNull(savedStateHandle["movieId"])
 
     private val _uiState = MutableStateFlow(MovieDetailUiState())
     val uiState: StateFlow<MovieDetailUiState> = _uiState.asStateFlow()
@@ -50,8 +53,6 @@ class MovieDetailViewModel(
     fun addToWatchlist() {
         val detail = _uiState.value.detail ?: return
         viewModelScope.launch {
-            val db = AppDatabase.getDatabase(application)
-            val repo = WatchlistRepository(db.watchlistDao(), db.movieDao())
             val entity = MovieEntity(
                 movieId = detail.id,
                 title = detail.title,
@@ -62,7 +63,7 @@ class MovieDetailViewModel(
                 director = detail.credits?.crew?.find { it.job == "Director" }?.name,
                 overview = detail.overview
             )
-            repo.addToWatchlist(entity, Priority.CASUAL)
+            watchlistRepository.addToWatchlist(entity, Priority.CASUAL)
             _uiState.value = _uiState.value.copy(isInWatchlist = true)
         }
     }
@@ -81,13 +82,4 @@ class MovieDetailViewModel(
         )
     }
 
-    class Factory(private val movieId: Int, private val application: Application) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(MovieDetailViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return MovieDetailViewModel(movieId, application) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
 }
