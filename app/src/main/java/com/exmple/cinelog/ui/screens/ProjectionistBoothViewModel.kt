@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.exmple.cinelog.data.repository.GeminiRepository
 import com.exmple.cinelog.data.repository.LogRepository
 import com.exmple.cinelog.data.repository.WatchlistRepository
-import com.exmple.cinelog.data.repository.GamificationRepository
+import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.domain.ProjectionistContext
 import com.exmple.cinelog.domain.PromptAssembler
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +26,10 @@ data class Message(
 
 data class ProjectionistUiState(
     val messages: List<Message> = listOf(
-        Message("The archive is open. What shadows are we chasing today?", isUser = false)
+        Message(
+            "The archive is open, and the projector is already humming. Tell me your mood, a film you love, or the kind of night you're after, and I'll find something worth falling into.",
+            isUser = false
+        )
     ),
     val isLoading: Boolean = false,
     val inputText: String = ""
@@ -37,7 +40,7 @@ class ProjectionistBoothViewModel @Inject constructor(
     private val geminiRepository: GeminiRepository,
     private val logRepository: LogRepository,
     private val watchlistRepository: WatchlistRepository,
-    private val gamificationRepository: GamificationRepository
+    private val archiveGamificationRepository: ArchiveGamificationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProjectionistUiState())
@@ -62,7 +65,7 @@ class ProjectionistBoothViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val context = buildContext()
-                val systemPrompt = PromptAssembler.build(context, userMessage)
+                val systemPrompt = PromptAssembler.build(context)
                 
                 val result = geminiRepository.sendMessage(systemPrompt, userMessage)
                 
@@ -85,23 +88,33 @@ class ProjectionistBoothViewModel @Inject constructor(
     }
 
     private suspend fun buildContext(): ProjectionistContext {
-        val logs = logRepository.getAllLogs().first().map { it.logEntry }
-        val watchlist = watchlistRepository.getWatchlist().first()
-        val profile = gamificationRepository.getUserProfile().first()
+        val logWithMovies = logRepository.getAllLogs().first()
+        val watchlist = watchlistRepository.getAllWatchlistItems().first()
+        val profile = archiveGamificationRepository.getUserProfile().first()
         
-        // Simple top genre/decade logic based on logs
-        val topGenre = logs.groupBy { it.genre }.maxByOrNull { it.value.size }?.key ?: "Unknown"
-        val favoriteDecade = logs.groupBy { 
-            val year = it.releaseDate.split("-").firstOrNull()?.toIntOrNull() ?: 0
+        val topGenre = logWithMovies
+            .flatMap { it.movie.genres.split(",").map { g -> g.trim() } }
+            .filter { it.isNotEmpty() }
+            .groupBy { it }
+            .maxByOrNull { it.value.size }?.key ?: "Unknown"
+
+        val favoriteDecade = logWithMovies.groupBy { 
+            val year = it.movie.releaseYear?.toIntOrNull() ?: 0
             if (year > 0) "${(year / 10) * 10}s" else "Unknown"
         }.maxByOrNull { it.value.size }?.key ?: "Unknown"
 
+        val topDirector = logWithMovies
+            .mapNotNull { it.movie.director }
+            .filter { it.isNotBlank() }
+            .groupBy { it }
+            .maxByOrNull { it.value.size }?.key ?: "Unknown"
+
         return ProjectionistContext(
-            recentLogs = logs.take(10),
+            recentLogs = logWithMovies.take(10).map { it.movie.title },
             topGenre = topGenre,
-            topDirector = "Unknown", // Would need director info in LogEntry for more depth
+            topDirector = topDirector,
             favoriteDecade = favoriteDecade,
-            watchlistTop5 = watchlist.take(5),
+            watchlistTop5 = watchlist.take(5).map { it.movie },
             totalFilmsLogged = profile?.totalFilmsWatched ?: 0
         )
     }

@@ -10,7 +10,9 @@ import com.exmple.cinelog.data.local.entity.Badge
 import com.exmple.cinelog.data.local.entity.Challenge
 import com.exmple.cinelog.data.local.entity.UserProfile
 import com.exmple.cinelog.data.repository.AiRepository
+import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.GeminiRepository
+import com.exmple.cinelog.data.repository.LogRepository
 import com.exmple.cinelog.data.local.entity.AiInsightEntity
 import com.exmple.cinelog.domain.GamificationManager
 import com.exmple.cinelog.domain.ProjectionistContext
@@ -38,7 +40,7 @@ data class ProfileUiState(
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val gamificationRepository: GamificationRepository,
+    private val archiveGamificationRepository: ArchiveGamificationRepository,
     private val logRepository: LogRepository,
     private val gamificationManager: GamificationManager,
     private val aiRepository: AiRepository,
@@ -51,10 +53,10 @@ class ProfileViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(
-                gamificationRepository.getUserProfile(),
-                gamificationRepository.getAllBadges(),
+                archiveGamificationRepository.getUserProfile(),
+                archiveGamificationRepository.getAllBadges(),
                 logRepository.getAllLogs(),
-                gamificationRepository.getActiveChallenges(),
+                archiveGamificationRepository.getActiveChallenges(),
                 aiRepository.getDailyInsight()
             ) { profile, badges, logs, challenges, cachedInsight ->
                 
@@ -145,8 +147,11 @@ class ProfileViewModel @Inject constructor(
                 watchlistTop5 = emptyList(),
                 totalFilmsLogged = total
             )
-            val prompt = PromptAssembler.build(context, "Give me one short, cryptic cinematic insight about my archive. Maximum 2 sentences.")
-            val result = geminiRepository.sendMessage(prompt, "")
+            val prompt = PromptAssembler.build(context)
+            val result = geminiRepository.sendMessage(
+                prompt,
+                "Give me one short, cryptic cinematic insight about my archive. Maximum 2 sentences."
+            )
             result.onSuccess { text ->
                 aiRepository.insertInsight(AiInsightEntity(insightText = text, generatedAt = System.currentTimeMillis()))
             }

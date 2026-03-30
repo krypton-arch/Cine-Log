@@ -6,7 +6,7 @@ import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.MovieEntity
 import com.exmple.cinelog.data.local.dao.LogWithMovie
 import com.exmple.cinelog.data.local.entity.UserProfile
-import com.exmple.cinelog.data.repository.GamificationRepository
+import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.LogRepository
 import com.exmple.cinelog.utils.MainDispatcherRule
 import io.mockk.coEvery
@@ -27,7 +27,7 @@ class GamificationManagerTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val mockLogRepo = mockk<LogRepository>(relaxed = true)
-    private val mockGamificationRepo = mockk<GamificationRepository>(relaxed = true)
+    private val mockGamificationRepo = mockk<ArchiveGamificationRepository>(relaxed = true)
     private val manager = GamificationManager(mockGamificationRepo, mockLogRepo)
 
     @Test
