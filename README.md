@@ -68,7 +68,9 @@ Latest APK:
 
 1. Download the APK to your Android device.
 2. Open it to install. You may need to allow installs from unknown sources.
-3. Your archive data stays on-device, so back it up if you move to a new phone.
+3. This build uses the restored original launcher artwork and is packaged as a signed release APK.
+4. The current release artifact is signed with the Android debug keystore, not a production release key.
+5. Your archive data stays on-device, so back it up if you move to a new phone.
 
 ---
 
