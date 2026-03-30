@@ -6,6 +6,7 @@ plugins {
     id("com.google.devtools.ksp")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.secrets.gradle)
 }
 
 android {
@@ -45,6 +46,10 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+}
+
+secrets {
+    propertiesFileName = "local.properties"
 }
 
 dependencies {
@@ -89,6 +94,7 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.generativeai)
 
     testImplementation("io.mockk:mockk:1.13.10")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")

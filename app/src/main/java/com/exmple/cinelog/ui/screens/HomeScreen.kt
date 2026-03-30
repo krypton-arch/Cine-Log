@@ -47,6 +47,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun HomeScreenRoute(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToWatchlist: () -> Unit,
+    onNavigateToProjectionist: () -> Unit,
     onMovieClick: (Int) -> Unit = {},
 ) {
     val trendingMovies by viewModel.trendingMovies.collectAsState()
@@ -57,14 +58,29 @@ fun HomeScreenRoute(
     val totalMinutes by viewModel.totalMinutesLogged.collectAsState()
     val watchlistCount by viewModel.watchlistCount.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(48.dp)
-    ) {
+    val watchlistCount by viewModel.watchlistCount.collectAsState()
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToProjectionist,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.AutoStories, contentDescription = "The Projectionist")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(48.dp)
+        ) {
         // ── Header ──
         Row(
             modifier = Modifier.fillMaxWidth(),

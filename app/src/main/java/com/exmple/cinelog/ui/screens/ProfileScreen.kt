@@ -157,6 +157,12 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // --- 5a. Archive Insights (AI) ---
+        if (uiState.dailyInsight != null) {
+            ArchiveInsightsRow(uiState.dailyInsight!!)
+            Spacer(modifier = Modifier.height(48.dp))
+        }
+
         // --- 6. Total Stats Blocks ---
         ProfileStatBlock(title = "TOTAL FILMS", value = totalFilmsLogged.toString())
         Spacer(modifier = Modifier.height(16.dp))
@@ -538,5 +544,45 @@ fun getBadgeIcon(badgeId: String): androidx.compose.ui.graphics.vector.ImageVect
         "binge_king" -> Icons.Outlined.Assignment
         "marathon" -> Icons.Outlined.MenuBook
         else -> Icons.Outlined.StarBorder
+    }
+}
+
+@Composable
+fun ArchiveInsightsRow(insight: String) {
+    Column {
+        Text(
+            "ARCHIVE INSIGHTS", 
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontSize = 10.sp), 
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                .padding(20.dp)
+        ) {
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(
+                    Icons.Filled.AutoStories, 
+                    contentDescription = null, 
+                    tint = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = insight,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }

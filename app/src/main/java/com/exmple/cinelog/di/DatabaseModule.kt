@@ -39,4 +39,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideUserProfileDao(database: AppDatabase): UserProfileDao = database.userProfileDao()
+
+    @Provides
+    @Singleton
+    fun provideAiDao(database: AppDatabase): AiDao = database.aiDao()
 }

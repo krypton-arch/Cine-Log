@@ -20,9 +20,10 @@ import kotlinx.coroutines.launch
         LogEntry::class,
         UserProfile::class,
         Badge::class,
-        Challenge::class
+        Challenge::class,
+        AiInsightEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(DatabaseConverters::class)
@@ -32,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun logDao(): LogDao
     abstract fun userProfileDao(): UserProfileDao
     abstract fun gamificationDao(): GamificationDao
+    abstract fun aiDao(): AiDao
     
     companion object {
         @Volatile

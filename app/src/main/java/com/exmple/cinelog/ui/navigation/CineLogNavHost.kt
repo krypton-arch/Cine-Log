@@ -41,8 +41,8 @@ fun CineLogNavHost(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Hide bottom bar on detail screen
-    val showBottomBar = currentRoute != "movieDetail/{movieId}"
+    // Hide bottom bar on detail and AI booth screen
+    val showBottomBar = currentRoute != "movieDetail/{movieId}" && currentRoute != "projectionist"
 
     Scaffold(
         bottomBar = {
@@ -108,6 +108,9 @@ fun CineLogNavHost(
                             restoreState = true
                         }
                     },
+                    onNavigateToProjectionist = {
+                        navController.navigate("projectionist")
+                    },
                     onMovieClick = { movieId ->
                         navController.navigate("movieDetail/$movieId")
                     }
@@ -142,6 +145,11 @@ fun CineLogNavHost(
                 MovieDetailScreen(
                     movieId = movieId,
                     onBack = { navController.popBackStack() }
+                )
+            }
+            composable("projectionist") {
+                ProjectionistBoothScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

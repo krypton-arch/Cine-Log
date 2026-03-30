@@ -7,6 +7,9 @@ import com.exmple.cinelog.data.local.entity.Challenge
 import com.exmple.cinelog.data.local.entity.UserProfile
 import kotlinx.coroutines.flow.Flow
 
+import javax.inject.Singleton
+
+@Singleton
 class GamificationRepository(
     private val gamificationDao: GamificationDao,
     private val userProfileDao: UserProfileDao

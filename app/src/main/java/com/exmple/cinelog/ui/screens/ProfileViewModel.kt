@@ -9,9 +9,12 @@ import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.entity.Badge
 import com.exmple.cinelog.data.local.entity.Challenge
 import com.exmple.cinelog.data.local.entity.UserProfile
-import com.exmple.cinelog.data.repository.GamificationRepository
-import com.exmple.cinelog.data.repository.LogRepository
+import com.exmple.cinelog.data.repository.AiRepository
+import com.exmple.cinelog.data.repository.GeminiRepository
+import com.exmple.cinelog.data.local.entity.AiInsightEntity
 import com.exmple.cinelog.domain.GamificationManager
+import com.exmple.cinelog.domain.ProjectionistContext
+import com.exmple.cinelog.domain.PromptAssembler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,14 +32,17 @@ data class ProfileUiState(
     val topGenres: List<Pair<String, Float>> = emptyList(),
     val activeChallenge: Challenge? = null,
     val favoriteDecade: String = "N/A",
-    val topDirector: String = "N/A"
+    val topDirector: String = "N/A",
+    val dailyInsight: String? = null
 )
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val gamificationRepository: GamificationRepository,
     private val logRepository: LogRepository,
-    private val gamificationManager: GamificationManager
+    private val gamificationManager: GamificationManager,
+    private val aiRepository: AiRepository,
+    private val geminiRepository: GeminiRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -48,8 +54,9 @@ class ProfileViewModel @Inject constructor(
                 gamificationRepository.getUserProfile(),
                 gamificationRepository.getAllBadges(),
                 logRepository.getAllLogs(),
-                gamificationRepository.getActiveChallenges()
-            ) { profile, badges, logs, challenges ->
+                gamificationRepository.getActiveChallenges(),
+                aiRepository.getDailyInsight()
+            ) { profile, badges, logs, challenges, cachedInsight ->
                 
                 val levelName = profile?.level?.let { gamificationManager.getLevelName(it) } ?: "Cinephile"
                 
@@ -58,7 +65,7 @@ class ProfileViewModel @Inject constructor(
                 var countWithRating = 0
                 val genreCounts = mutableMapOf<String, Int>()
                 val directorCounts = mutableMapOf<String, Int>()
-                val yearCounts = mutableMapOf<String, Int>()
+                val yearCounts = mutableMapOf<Int, Int>()
                 val decadeCounts = mutableMapOf<Int, Int>()
 
                 logs.forEach { logWithMovie ->
@@ -79,9 +86,9 @@ class ProfileViewModel @Inject constructor(
 
                     val yearStr = logWithMovie.movie.releaseYear
                     if (!yearStr.isNullOrBlank()) {
-                        yearCounts[yearStr] = yearCounts.getOrDefault(yearStr, 0) + 1
                         val year = yearStr.toIntOrNull()
                         if (year != null && year > 1800) {
+                            yearCounts[year] = yearCounts.getOrDefault(year, 0) + 1
                             val decade = (year / 10) * 10
                             decadeCounts[decade] = decadeCounts.getOrDefault(decade, 0) + 1
                         }
@@ -95,10 +102,13 @@ class ProfileViewModel @Inject constructor(
                     .take(4)
                     .map { it.key to (it.value.toFloat() / maxOf(1, genreCounts.values.sum())) * 100 }
 
-                val topYear = yearCounts.maxByOrNull { it.value }?.key ?: "NONE"
                 val topDirector = directorCounts.maxByOrNull { it.value }?.key ?: "NONE"
                 val favoriteDecade = decadeCounts.maxByOrNull { it.value }?.key?.let { "${it}s" } ?: "NONE"
                 val activeChallenge = challenges.firstOrNull()
+
+                if (logs.isNotEmpty() && (cachedInsight == null || isCacheStale(cachedInsight.generatedAt))) {
+                    generateDailyInsight(logs.size, topGenres.firstOrNull()?.first ?: "Unknown", favoriteDecade, topDirector)
+                }
 
                 ProfileUiState(
                     userProfile = profile,
@@ -110,7 +120,8 @@ class ProfileViewModel @Inject constructor(
                     topGenres = topGenres,
                     activeChallenge = activeChallenge,
                     favoriteDecade = favoriteDecade,
-                    topDirector = topDirector
+                    topDirector = topDirector,
+                    dailyInsight = cachedInsight?.insightText
                 )
             }.catch { /* Handle error */ }
             .collect { state ->
@@ -119,4 +130,26 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    private fun isCacheStale(generatedAt: Long): Boolean {
+        val twentyFourHours = 24 * 60 * 60 * 1000L
+        return System.currentTimeMillis() - generatedAt > twentyFourHours
+    }
+
+    private fun generateDailyInsight(total: Int, genre: String, decade: String, director: String) {
+        viewModelScope.launch {
+            val context = ProjectionistContext(
+                recentLogs = emptyList(),
+                topGenre = genre,
+                topDirector = director,
+                favoriteDecade = decade,
+                watchlistTop5 = emptyList(),
+                totalFilmsLogged = total
+            )
+            val prompt = PromptAssembler.build(context, "Give me one short, cryptic cinematic insight about my archive. Maximum 2 sentences.")
+            val result = geminiRepository.sendMessage(prompt, "")
+            result.onSuccess { text ->
+                aiRepository.insertInsight(AiInsightEntity(insightText = text, generatedAt = System.currentTimeMillis()))
+            }
+        }
+    }
 }
