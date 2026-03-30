@@ -92,6 +92,7 @@ fun ProjectionistBoothScreen(
     val scrollState = rememberLazyListState()
     val archiveVoices = remember(uiState.messages) { uiState.messages.count { !it.isUser } }
     val userPrompts = remember(uiState.messages) { uiState.messages.count { it.isUser } }
+    val hasConversation = remember(uiState.messages) { uiState.messages.any { it.isUser } }
 
     LaunchedEffect(uiState.messages.size, uiState.isLoading) {
         val listTailIndex = uiState.messages.lastIndex + if (uiState.isLoading) 1 else 0
@@ -170,39 +171,41 @@ fun ProjectionistBoothScreen(
                     .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                BoothHeroCard(
-                    archiveVoices = archiveVoices,
-                    userPrompts = userPrompts
-                )
-
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        text = "QUICK CUES",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = BoothSmoke,
-                        letterSpacing = 1.8.sp
+                if (!hasConversation) {
+                    BoothHeroCard(
+                        archiveVoices = archiveVoices,
+                        userPrompts = userPrompts
                     )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        BoothQuickPrompts.forEach { prompt ->
-                            QuickCueChip(
-                                text = prompt,
-                                onClick = { viewModel.onInputChanged(prompt) }
-                            )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = "QUICK CUES",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = BoothSmoke,
+                            letterSpacing = 1.8.sp
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            BoothQuickPrompts.forEach { prompt ->
+                                QuickCueChip(
+                                    text = prompt,
+                                    onClick = { viewModel.onInputChanged(prompt) }
+                                )
+                            }
                         }
                     }
-                }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .regalDivider()
-                )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .regalDivider()
+                    )
+                }
 
                 Surface(
                     color = Color.Transparent,
@@ -269,12 +272,14 @@ fun ProjectionistBoothScreen(
                         onSend = viewModel::sendMessage,
                         isLoading = uiState.isLoading
                     )
-                    Text(
-                        text = "The more specific you are about mood, decade, language, or runtime, the better the booth gets.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = BoothSmoke,
-                        modifier = Modifier.padding(horizontal = 6.dp)
-                    )
+                    if (!hasConversation) {
+                        Text(
+                            text = "The more specific you are about mood, decade, language, or runtime, the better the booth gets.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = BoothSmoke,
+                            modifier = Modifier.padding(horizontal = 6.dp)
+                        )
+                    }
                 }
             }
         }
