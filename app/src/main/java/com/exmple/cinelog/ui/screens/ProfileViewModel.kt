@@ -1,11 +1,8 @@
 package com.exmple.cinelog.ui.screens
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import com.exmple.cinelog.data.local.AppDatabase
+import com.exmple.cinelog.data.local.entity.AiInsightEntity
 import com.exmple.cinelog.data.local.entity.Badge
 import com.exmple.cinelog.data.local.entity.Challenge
 import com.exmple.cinelog.data.local.entity.UserProfile
@@ -13,16 +10,17 @@ import com.exmple.cinelog.data.repository.AiRepository
 import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.GeminiRepository
 import com.exmple.cinelog.data.repository.LogRepository
-import com.exmple.cinelog.data.local.entity.AiInsightEntity
 import com.exmple.cinelog.domain.GamificationManager
 import com.exmple.cinelog.domain.ProjectionistContext
 import com.exmple.cinelog.domain.PromptAssembler
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class ProfileUiState(
     val userProfile: UserProfile? = null,
@@ -59,15 +57,14 @@ class ProfileViewModel @Inject constructor(
                 archiveGamificationRepository.getActiveChallenges(),
                 aiRepository.getDailyInsight()
             ) { profile, badges, logs, challenges, cachedInsight ->
-                
+
                 val levelName = profile?.level?.let { gamificationManager.getLevelName(it) } ?: "Cinephile"
-                
+
                 var totalMinutes = 0
                 var totalRating = 0f
                 var countWithRating = 0
                 val genreCounts = mutableMapOf<String, Int>()
                 val directorCounts = mutableMapOf<String, Int>()
-                val yearCounts = mutableMapOf<Int, Int>()
                 val decadeCounts = mutableMapOf<Int, Int>()
 
                 logs.forEach { logWithMovie ->
@@ -76,7 +73,11 @@ class ProfileViewModel @Inject constructor(
                         totalRating += logWithMovie.logEntry.rating
                         countWithRating++
                     }
-                    val genresList = logWithMovie.movie.genres.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+
+                    val genresList = logWithMovie.movie.genres
+                        .split(",")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
                     genresList.forEach { genre ->
                         genreCounts[genre] = genreCounts.getOrDefault(genre, 0) + 1
                     }
@@ -90,7 +91,6 @@ class ProfileViewModel @Inject constructor(
                     if (!yearStr.isNullOrBlank()) {
                         val year = yearStr.toIntOrNull()
                         if (year != null && year > 1800) {
-                            yearCounts[year] = yearCounts.getOrDefault(year, 0) + 1
                             val decade = (year / 10) * 10
                             decadeCounts[decade] = decadeCounts.getOrDefault(decade, 0) + 1
                         }
@@ -109,7 +109,12 @@ class ProfileViewModel @Inject constructor(
                 val activeChallenge = challenges.firstOrNull()
 
                 if (logs.isNotEmpty() && (cachedInsight == null || isCacheStale(cachedInsight.generatedAt))) {
-                    generateDailyInsight(logs.size, topGenres.firstOrNull()?.first ?: "Unknown", favoriteDecade, topDirector)
+                    generateDailyInsight(
+                        total = logs.size,
+                        genre = topGenres.firstOrNull()?.first ?: "Unknown",
+                        decade = favoriteDecade,
+                        director = topDirector
+                    )
                 }
 
                 ProfileUiState(
@@ -126,9 +131,9 @@ class ProfileViewModel @Inject constructor(
                     dailyInsight = cachedInsight?.insightText
                 )
             }.catch { /* Handle error */ }
-            .collect { state ->
-                _uiState.value = state
-            }
+                .collect { state ->
+                    _uiState.value = state
+                }
         }
     }
 
@@ -153,7 +158,12 @@ class ProfileViewModel @Inject constructor(
                 "Give me one short, cryptic cinematic insight about my archive. Maximum 2 sentences."
             )
             result.onSuccess { text ->
-                aiRepository.insertInsight(AiInsightEntity(insightText = text, generatedAt = System.currentTimeMillis()))
+                aiRepository.insertInsight(
+                    AiInsightEntity(
+                        insightText = text,
+                        generatedAt = System.currentTimeMillis()
+                    )
+                )
             }
         }
     }

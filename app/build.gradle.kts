@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
     alias(libs.plugins.hilt)
-    alias(libs.plugins.secrets.gradle)
 }
 
 android {
@@ -20,7 +19,10 @@ android {
         versionCode = 1
         versionName = "1.0"
         val tmdbKey = gradleLocalProperties(rootDir, providers).getProperty("TMDB_API_KEY") ?: ""
+        val geminiProxyBaseUrl = gradleLocalProperties(rootDir, providers)
+            .getProperty("GEMINI_PROXY_BASE_URL") ?: ""
         buildConfigField("String", "TMDB_API_KEY", "\"" + tmdbKey + "\"")
+        buildConfigField("String", "GEMINI_PROXY_BASE_URL", "\"" + geminiProxyBaseUrl + "\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,11 +48,6 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-
-}
-
-secrets {
-    propertiesFileName = "local.properties"
 }
 
 dependencies {

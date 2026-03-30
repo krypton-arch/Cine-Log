@@ -30,6 +30,7 @@ CineLog is a premium Android film diary and personal movie archive for people wh
 - Get longer-form movie recommendations, comparisons, and discussion.
 - Use quick conversation cues for moods, double features, and tailored picks.
 - Explore a redesigned booth UI with a cinema-lounge hero panel, richer message bubbles, and faster entry points into conversation.
+- Use a secure server-side relay so the app can call Gemini without bundling your key into the APK.
 
 ### Subtle Milestones
 - Unlock badges like First Frame, Old Soul, Horror Fiend, and Week Warrior.
@@ -64,13 +65,14 @@ CineLog follows a luxury noir visual system:
 
 Latest APK:
 
-### [CineLog-v2.1-ProjectionistBooth.apk](https://github.com/krypton-arch/Cine-Log/blob/main/releases/CineLog-v2.1-ProjectionistBooth.apk)
+### [CineLog-v2.2-SecureRelay.apk](https://github.com/krypton-arch/Cine-Log/blob/main/releases/CineLog-v2.2-SecureRelay.apk)
 
 1. Download the APK to your Android device.
 2. Open it to install. You may need to allow installs from unknown sources.
 3. This build uses the restored original launcher artwork and is packaged as a signed release APK.
 4. The current release artifact is signed with the Android debug keystore, not a production release key.
-5. Your archive data stays on-device, so back it up if you move to a new phone.
+5. Projectionist's Booth now expects a configured Gemini relay instead of a client-side Gemini secret.
+6. Your archive data stays on-device, so back it up if you move to a new phone.
 
 ---
 
@@ -79,7 +81,7 @@ Latest APK:
 ### Prerequisites
 - Android Studio Ladybug or newer
 - A TMDB API key
-- A Gemini API key
+- A deployed Gemini relay URL if you want to use the Projectionist's Booth securely
 
 ### Setup
 
@@ -87,7 +89,7 @@ Create or update `local.properties` in the project root:
 
 ```properties
 TMDB_API_KEY=your_tmdb_key_here
-GEMINI_API_KEY=your_gemini_key_here
+GEMINI_PROXY_BASE_URL=https://your-relay.example.com
 ```
 
 Then build:
@@ -95,6 +97,8 @@ Then build:
 ```bash
 ./gradlew assembleDebug
 ```
+
+The Android app no longer expects a Gemini secret locally. Keep `GEMINI_API_KEY` on the relay server only, and point the app at that relay with `GEMINI_PROXY_BASE_URL`.
 
 ---
 

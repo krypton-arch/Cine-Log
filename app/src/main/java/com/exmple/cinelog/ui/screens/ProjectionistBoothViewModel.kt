@@ -123,8 +123,11 @@ class ProjectionistBoothViewModel @Inject constructor(
         return when (e) {
             is IOException -> ProjectionistStrings.OFFLINE
             else -> {
-                if (e.message?.contains("429") == true) ProjectionistStrings.RATE_LIMITED
-                else ProjectionistStrings.SERVER_ERROR
+                when {
+                    e.message?.contains("429") == true -> ProjectionistStrings.RATE_LIMITED
+                    e.message?.contains("Gemini relay", ignoreCase = true) == true -> ProjectionistStrings.SECURE_RELAY_UNAVAILABLE
+                    else -> ProjectionistStrings.SERVER_ERROR
+                }
             }
         }
     }

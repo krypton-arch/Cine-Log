@@ -29,29 +29,20 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
 
     override suspend fun sendMessage(systemPrompt: String, userMessage: String): Result<String> {
         return runCatching {
-            val apiKey = BuildConfig.GEMINI_API_KEY.trim()
-            require(apiKey.isNotEmpty()) { "Gemini API key is missing." }
+            val relayBaseUrl = BuildConfig.GEMINI_PROXY_BASE_URL.trim().trimEnd('/')
+            require(relayBaseUrl.isNotEmpty()) {
+                "Gemini relay is not configured."
+            }
 
-            val requestBody = GeminiGenerateContentRequest(
-                systemInstruction = GeminiContent(
-                    parts = listOf(GeminiPart(text = systemPrompt.trim()))
-                ),
-                contents = listOf(
-                    GeminiContent(
-                        role = "user",
-                        parts = listOf(
-                            GeminiPart(
-                                text = userMessage.ifBlank {
-                                    "Reply to the system instruction."
-                                }
-                            )
-                        )
-                    )
-                )
+            val requestBody = GeminiRelayRequest(
+                systemPrompt = systemPrompt.trim(),
+                userMessage = userMessage.ifBlank {
+                    "Reply to the system instruction."
+                }
             )
 
             val request = Request.Builder()
-                .url("$BASE_URL/$MODEL:generateContent?key=$apiKey")
+                .url("$relayBaseUrl/$RELAY_PATH")
                 .post(gson.toJson(requestBody).toRequestBody(JSON_MEDIA_TYPE))
                 .build()
 
@@ -62,22 +53,13 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
                         throw IllegalStateException(buildErrorMessage(response.code, rawBody))
                     }
 
-                    val payload = gson.fromJson(rawBody, GeminiGenerateContentResponse::class.java)
-                    val text = payload.candidates
-                        .orEmpty()
-                        .asSequence()
-                        .flatMap { it.content?.parts.orEmpty().asSequence() }
-                        .mapNotNull { it.text?.trim() }
-                        .firstOrNull { it.isNotEmpty() }
+                    val payload = gson.fromJson(rawBody, GeminiRelayResponse::class.java)
+                    val text = payload.text?.trim()
 
                     when {
                         !text.isNullOrBlank() -> text
-                        !payload.promptFeedback?.blockReason.isNullOrBlank() -> {
-                            throw IllegalStateException(
-                                "Gemini blocked the prompt: ${payload.promptFeedback?.blockReason}."
-                            )
-                        }
-                        else -> throw IllegalStateException("Gemini returned an empty response.")
+                        !payload.error.isNullOrBlank() -> throw IllegalStateException(payload.error.trim())
+                        else -> throw IllegalStateException("Gemini relay returned an empty response.")
                     }
                 }
             }
@@ -86,61 +68,28 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
 
     private fun buildErrorMessage(code: Int, rawBody: String): String {
         val apiMessage = runCatching {
-            gson.fromJson(rawBody, GeminiErrorEnvelope::class.java).error?.message?.trim()
+            gson.fromJson(rawBody, GeminiRelayResponse::class.java).error?.trim()
         }.getOrNull()
 
         return if (!apiMessage.isNullOrBlank()) {
-            "Gemini API error ($code): $apiMessage"
+            "Gemini relay error ($code): $apiMessage"
         } else {
-            "Gemini API error ($code)."
+            "Gemini relay error ($code)."
         }
     }
 
-    private data class GeminiGenerateContentRequest(
-        val systemInstruction: GeminiContent,
-        val contents: List<GeminiContent>,
-        val generationConfig: GeminiGenerationConfig = GeminiGenerationConfig()
+    private data class GeminiRelayRequest(
+        val systemPrompt: String,
+        val userMessage: String
     )
 
-    private data class GeminiGenerationConfig(
-        val temperature: Float = 0.7f,
-        val topP: Float = 0.9f,
-        val maxOutputTokens: Int = 3072
-    )
-
-    private data class GeminiContent(
-        val parts: List<GeminiPart>,
-        val role: String? = null
-    )
-
-    private data class GeminiPart(
-        val text: String? = null
-    )
-
-    private data class GeminiGenerateContentResponse(
-        val candidates: List<GeminiCandidate>? = null,
-        val promptFeedback: GeminiPromptFeedback? = null
-    )
-
-    private data class GeminiCandidate(
-        val content: GeminiContent? = null
-    )
-
-    private data class GeminiPromptFeedback(
-        val blockReason: String? = null
-    )
-
-    private data class GeminiErrorEnvelope(
-        val error: GeminiErrorBody? = null
-    )
-
-    private data class GeminiErrorBody(
-        val message: String? = null
+    private data class GeminiRelayResponse(
+        val text: String? = null,
+        val error: String? = null
     )
 
     private companion object {
-        const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
-        const val MODEL = "gemini-2.5-flash"
+        const val RELAY_PATH = "v1/gemini/generate"
         val JSON_MEDIA_TYPE = "application/json".toMediaType()
     }
 }
