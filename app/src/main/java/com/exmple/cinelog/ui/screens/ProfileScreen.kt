@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.exmple.cinelog.data.local.entity.Badge
+import com.exmple.cinelog.ui.screens.profile.ProfileViewModel
 import com.exmple.cinelog.ui.theme.PlayfairDisplayFont
 import androidx.hilt.navigation.compose.hiltViewModel
 

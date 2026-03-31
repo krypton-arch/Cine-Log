@@ -37,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.exmple.cinelog.data.local.dao.WatchlistItemWithMovie
 import com.exmple.cinelog.data.remote.RemoteMovie
+import com.exmple.cinelog.ui.screens.watchlist.WatchlistViewModel
 import com.exmple.cinelog.ui.theme.bounceClick
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface

@@ -150,18 +150,30 @@ class GamificationManagerTest {
     @Test
     fun `checkChallenges updates progress correctly`() = runTest {
         val challenge = Challenge("review_streak", "Review Streak", "", 10, 0, null, false)
-        val logs = List(3) { 
+        val logs = listOf(
             LogWithMovie(
-                logEntry = LogEntry(movieId = it, watchDate = 0, rating = 5f, review = "Good", moodTag = null, isRewatch = false),
-                movie = MovieEntity(movieId = it, title = "Movie $it", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
-            ) 
-        }
+                logEntry = LogEntry(movieId = 1, watchDate = 4L, rating = 5f, review = "Great", moodTag = null, isRewatch = false),
+                movie = MovieEntity(movieId = 1, title = "Movie 1", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
+            ),
+            LogWithMovie(
+                logEntry = LogEntry(movieId = 2, watchDate = 3L, rating = 4.5f, review = "Sharp", moodTag = null, isRewatch = false),
+                movie = MovieEntity(movieId = 2, title = "Movie 2", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
+            ),
+            LogWithMovie(
+                logEntry = LogEntry(movieId = 3, watchDate = 2L, rating = 4f, review = "", moodTag = null, isRewatch = false),
+                movie = MovieEntity(movieId = 3, title = "Movie 3", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
+            ),
+            LogWithMovie(
+                logEntry = LogEntry(movieId = 4, watchDate = 1L, rating = 4f, review = "Should not count", moodTag = null, isRewatch = false),
+                movie = MovieEntity(movieId = 4, title = "Movie 4", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
+            )
+        )
         
         coEvery { mockGamificationRepo.getActiveChallenges() } returns flowOf(listOf(challenge))
         coEvery { mockLogRepo.getAllLogs() } returns flowOf(logs)
 
         manager.checkChallenges()
 
-        coVerify { mockGamificationRepo.updateChallengeProgress(challenge, 3) }
+        coVerify { mockGamificationRepo.updateChallengeProgress(challenge, 2) }
     }
 }

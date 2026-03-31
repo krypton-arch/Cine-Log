@@ -9,13 +9,36 @@ data class ProjectionistContext(
     val favoriteDecade: String,
     val watchlistTop5: List<MovieEntity>,
     val totalFilmsLogged: Int
+) {
+    companion object {
+        val EMPTY = ProjectionistContext(
+            recentLogs = emptyList(),
+            topGenre = "Unknown",
+            topDirector = "Unknown",
+            favoriteDecade = "Unknown",
+            watchlistTop5 = emptyList(),
+            totalFilmsLogged = 0
+        )
+    }
+}
+
+data class ProjectionistTranscriptLine(
+    val speaker: String,
+    val text: String
 )
 
 object PromptAssembler {
 
-    fun build(context: ProjectionistContext): String {
+    fun build(
+        context: ProjectionistContext,
+        conversationHistory: List<ProjectionistTranscriptLine> = emptyList()
+    ): String {
         val recentTitles = context.recentLogs.take(5).joinToString().ifBlank { "None logged recently" }
         val watchlist = context.watchlistTop5.joinToString { it.title }.ifBlank { "Watchlist is empty" }
+        val transcript = conversationHistory
+            .takeLast(8)
+            .joinToString("\n") { "- ${it.speaker}: ${it.text}" }
+            .ifBlank { "None yet" }
 
         return """
             You are The Projectionist, the keeper of the Noir Archive.
@@ -39,6 +62,9 @@ object PromptAssembler {
             - Most-watched director: ${context.topDirector}
             - Watchlist: $watchlist
             - Total films logged: ${context.totalFilmsLogged}
+
+            Recent booth conversation:
+            $transcript
         """.trimIndent()
     }
 }

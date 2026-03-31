@@ -32,6 +32,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.exmple.cinelog.ui.screens.diary.DiaryViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

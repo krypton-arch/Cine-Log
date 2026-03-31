@@ -1,11 +1,9 @@
-package com.exmple.cinelog.ui.screens
+package com.exmple.cinelog.ui.screens.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.exmple.cinelog.data.local.entity.AiInsightEntity
-import com.exmple.cinelog.data.local.entity.Badge
-import com.exmple.cinelog.data.local.entity.Challenge
-import com.exmple.cinelog.data.local.entity.UserProfile
 import com.exmple.cinelog.data.repository.AiRepository
 import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.GeminiRepository
@@ -13,6 +11,10 @@ import com.exmple.cinelog.data.repository.LogRepository
 import com.exmple.cinelog.domain.GamificationManager
 import com.exmple.cinelog.domain.ProjectionistContext
 import com.exmple.cinelog.domain.PromptAssembler
+import com.exmple.cinelog.data.local.entity.Badge
+import com.exmple.cinelog.data.local.entity.Challenge
+import com.exmple.cinelog.data.local.entity.UserProfile
+import com.exmple.cinelog.utils.rethrowIfCancellation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +49,7 @@ class ProfileViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+    private var insightRefreshInFlight = false
 
     init {
         viewModelScope.launch {
@@ -108,8 +111,8 @@ class ProfileViewModel @Inject constructor(
                 val favoriteDecade = decadeCounts.maxByOrNull { it.value }?.key?.let { "${it}s" } ?: "NONE"
                 val activeChallenge = challenges.firstOrNull()
 
-                if (logs.isNotEmpty() && (cachedInsight == null || isCacheStale(cachedInsight.generatedAt))) {
-                    generateDailyInsight(
+                if (shouldRefreshInsight(logs.isNotEmpty(), cachedInsight)) {
+                    requestDailyInsight(
                         total = logs.size,
                         genre = topGenres.firstOrNull()?.first ?: "Unknown",
                         decade = favoriteDecade,
@@ -130,11 +133,26 @@ class ProfileViewModel @Inject constructor(
                     topDirector = topDirector,
                     dailyInsight = cachedInsight?.insightText
                 )
-            }.catch { /* Handle error */ }
+            }.catch { error ->
+                error.rethrowIfCancellation()
+                Log.e("ProfileViewModel", "Failed to load profile state", error)
+            }
                 .collect { state ->
                     _uiState.value = state
                 }
         }
+    }
+
+    private fun shouldRefreshInsight(
+        hasLogs: Boolean,
+        cachedInsight: AiInsightEntity?
+    ): Boolean {
+        if (!hasLogs || insightRefreshInFlight) {
+            return false
+        }
+
+        val generatedAt = cachedInsight?.generatedAt ?: return true
+        return isCacheStale(generatedAt)
     }
 
     private fun isCacheStale(generatedAt: Long): Boolean {
@@ -142,28 +160,41 @@ class ProfileViewModel @Inject constructor(
         return System.currentTimeMillis() - generatedAt > twentyFourHours
     }
 
-    private fun generateDailyInsight(total: Int, genre: String, decade: String, director: String) {
+    private fun requestDailyInsight(total: Int, genre: String, decade: String, director: String) {
+        insightRefreshInFlight = true
         viewModelScope.launch {
-            val context = ProjectionistContext(
-                recentLogs = emptyList(),
-                topGenre = genre,
-                topDirector = director,
-                favoriteDecade = decade,
-                watchlistTop5 = emptyList(),
-                totalFilmsLogged = total
-            )
-            val prompt = PromptAssembler.build(context)
-            val result = geminiRepository.sendMessage(
-                prompt,
-                "Give me one short, cryptic cinematic insight about my archive. Maximum 2 sentences."
-            )
-            result.onSuccess { text ->
-                aiRepository.insertInsight(
-                    AiInsightEntity(
-                        insightText = text,
+            try {
+                val context = ProjectionistContext(
+                    recentLogs = emptyList(),
+                    topGenre = genre,
+                    topDirector = director,
+                    favoriteDecade = decade,
+                    watchlistTop5 = emptyList(),
+                    totalFilmsLogged = total
+                )
+                val prompt = PromptAssembler.build(context)
+                val result = geminiRepository.sendMessage(
+                    prompt,
+                    "Give me one short, cryptic cinematic insight about my archive. Maximum 2 sentences."
+                )
+
+                val insightText = result.getOrNull()
+                if (insightText != null) {
+                    aiRepository.saveInsight(
+                        insightText = insightText,
                         generatedAt = System.currentTimeMillis()
                     )
-                )
+                } else {
+                    result.exceptionOrNull()?.let { error ->
+                        error.rethrowIfCancellation()
+                        Log.e("ProfileViewModel", "Failed to generate daily insight", error)
+                    }
+                }
+            } catch (error: Throwable) {
+                error.rethrowIfCancellation()
+                Log.e("ProfileViewModel", "Failed to generate daily insight", error)
+            } finally {
+                insightRefreshInFlight = false
             }
         }
     }

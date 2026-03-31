@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.exmple.cinelog.data.remote.RemoteMovie
+import com.exmple.cinelog.ui.screens.home.HomeViewModel
 import com.exmple.cinelog.ui.theme.bounceClick
 import com.exmple.cinelog.ui.theme.shimmerEffect
 import com.exmple.cinelog.ui.theme.glassCard

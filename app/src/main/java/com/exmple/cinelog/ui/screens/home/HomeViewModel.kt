@@ -1,22 +1,20 @@
-package com.exmple.cinelog.ui.screens
+package com.exmple.cinelog.ui.screens.home
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.remote.RemoteMovie
 import com.exmple.cinelog.data.remote.RetrofitClient
 import com.exmple.cinelog.data.repository.LogRepository
 import com.exmple.cinelog.data.repository.WatchlistRepository
-import kotlinx.coroutines.Job
+import com.exmple.cinelog.utils.rethrowIfCancellation
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -57,29 +55,33 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _trendingMovies.value = api.getTrendingMovies().results
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Trending fetch failed", e)
+            } catch (error: Throwable) {
+                error.rethrowIfCancellation()
+                Log.e("HomeViewModel", "Trending fetch failed", error)
             }
         }
         viewModelScope.launch {
             try {
                 _popularMovies.value = api.getPopularMovies().results
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Popular fetch failed", e)
+            } catch (error: Throwable) {
+                error.rethrowIfCancellation()
+                Log.e("HomeViewModel", "Popular fetch failed", error)
             }
         }
         viewModelScope.launch {
             try {
                 _nowPlayingMovies.value = api.getNowPlayingMovies().results
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "NowPlaying fetch failed", e)
+            } catch (error: Throwable) {
+                error.rethrowIfCancellation()
+                Log.e("HomeViewModel", "NowPlaying fetch failed", error)
             }
         }
         viewModelScope.launch {
             try {
                 _topRatedMovies.value = api.getTopRatedMovies().results
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "TopRated fetch failed", e)
+            } catch (error: Throwable) {
+                error.rethrowIfCancellation()
+                Log.e("HomeViewModel", "TopRated fetch failed", error)
             }
         }
     }
@@ -87,19 +89,18 @@ class HomeViewModel @Inject constructor(
     private fun loadLocalStats() {
         viewModelScope.launch {
             logRepository.getTotalFilmsWatched()
-                .catch { /* ignore */ }
+                .catch { error -> error.rethrowIfCancellation() }
                 .collect { _totalFilmsLogged.value = it }
         }
         viewModelScope.launch {
             logRepository.getTotalMinutesWatched()
-                .catch { /* ignore */ }
+                .catch { error -> error.rethrowIfCancellation() }
                 .collect { _totalMinutesLogged.value = it ?: 0 }
         }
         viewModelScope.launch {
             watchlistRepository.getWatchlistCount()
-                .catch { /* ignore */ }
+                .catch { error -> error.rethrowIfCancellation() }
                 .collect { _watchlistCount.value = it }
         }
     }
-
 }
