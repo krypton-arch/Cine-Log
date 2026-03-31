@@ -1,18 +1,18 @@
-package com.exmple.cinelog.ui.screens
+package com.exmple.cinelog.ui.screens.logging
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.MovieEntity
 import com.exmple.cinelog.data.repository.LogRepository
 import com.exmple.cinelog.domain.GamificationManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.Instant
+import javax.inject.Inject
 
 @HiltViewModel
 class LoggingViewModel @Inject constructor(
@@ -69,9 +69,8 @@ class LoggingViewModel @Inject constructor(
             
             // 3. Update challenge progress
             gamificationManager.checkChallenges()
-            
+
             onComplete()
         }
     }
-
 }

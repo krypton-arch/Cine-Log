@@ -2,13 +2,13 @@ package com.exmple.cinelog.data.repository
 
 import com.exmple.cinelog.BuildConfig
 import com.google.gson.Gson
+import com.exmple.cinelog.utils.rethrowIfCancellation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,7 +28,7 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
     private val gson = Gson()
 
     override suspend fun sendMessage(systemPrompt: String, userMessage: String): Result<String> {
-        return runCatching {
+        return try {
             val relayBaseUrl = BuildConfig.GEMINI_PROXY_BASE_URL.trim().trimEnd('/')
             require(relayBaseUrl.isNotEmpty()) {
                 "Gemini relay is not configured."
@@ -46,7 +46,7 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
                 .post(gson.toJson(requestBody).toRequestBody(JSON_MEDIA_TYPE))
                 .build()
 
-            withContext(Dispatchers.IO) {
+            val responseText = withContext(Dispatchers.IO) {
                 client.newCall(request).execute().use { response ->
                     val rawBody = response.body?.string().orEmpty()
                     if (!response.isSuccessful) {
@@ -63,13 +63,19 @@ class GeminiRepositoryImpl @Inject constructor() : GeminiRepository {
                     }
                 }
             }
+            Result.success(responseText)
+        } catch (error: Throwable) {
+            error.rethrowIfCancellation()
+            Result.failure(error)
         }
     }
 
     private fun buildErrorMessage(code: Int, rawBody: String): String {
-        val apiMessage = runCatching {
+        val apiMessage = try {
             gson.fromJson(rawBody, GeminiRelayResponse::class.java).error?.trim()
-        }.getOrNull()
+        } catch (_: Exception) {
+            null
+        }
 
         return if (!apiMessage.isNullOrBlank()) {
             "Gemini relay error ($code): $apiMessage"

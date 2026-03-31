@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.exmple.cinelog.data.local.entity.MovieEntity
+import com.exmple.cinelog.ui.screens.logging.LoggingViewModel
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
 import java.time.LocalDate

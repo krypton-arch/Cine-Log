@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AiDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrUpdateInsight(insight: AiInsightEntity)
+    @Query("SELECT * FROM ai_insights WHERE id = 1")
+    fun observeState(): Flow<AiInsightEntity?>
 
     @Query("SELECT * FROM ai_insights WHERE id = 1")
-    fun getDailyInsight(): Flow<AiInsightEntity?>
-    
-    @Query("DELETE FROM ai_insights")
-    suspend fun clearInsights()
+    suspend fun getStateSnapshot(): AiInsightEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertState(state: AiInsightEntity)
 }

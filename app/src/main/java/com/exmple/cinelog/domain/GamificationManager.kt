@@ -1,14 +1,12 @@
 package com.exmple.cinelog.domain
 
+import com.exmple.cinelog.data.local.dao.LogWithMovie
 import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.UserProfile
 import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.LogRepository
 import kotlinx.coroutines.flow.firstOrNull
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
-
 import javax.inject.Inject
 
 class GamificationManager @Inject constructor(
@@ -199,7 +197,7 @@ class GamificationManager @Inject constructor(
                         .size
                 }
                 "review_streak" -> {
-                    logs.count { !it.logEntry.review.isNullOrBlank() }
+                    countConsecutiveReviewedLogs(logs)
                 }
                 else -> challenge.currentCount
             }
@@ -210,5 +208,12 @@ class GamificationManager @Inject constructor(
                 archiveGamificationRepository.completeChallenge(challenge)
             }
         }
+    }
+
+    private fun countConsecutiveReviewedLogs(logs: List<LogWithMovie>): Int {
+        return logs
+            .sortedByDescending { it.logEntry.watchDate }
+            .takeWhile { !it.logEntry.review.isNullOrBlank() }
+            .size
     }
 }

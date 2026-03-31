@@ -1,18 +1,18 @@
-package com.exmple.cinelog.ui.screens
+package com.exmple.cinelog.ui.screens.diary
 
-import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.dao.LogWithMovie
 import com.exmple.cinelog.data.repository.LogRepository
+import com.exmple.cinelog.utils.rethrowIfCancellation
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class DiaryViewModel @Inject constructor(
@@ -25,11 +25,14 @@ class DiaryViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             repository.getAllLogs()
-                .catch { /* Handle error */ }
+                .catch { error ->
+                    error.rethrowIfCancellation()
+                    Log.e("DiaryViewModel", "Failed to load diary logs", error)
+                    _logs.value = emptyList()
+                }
                 .collect { dbLogs ->
                     _logs.value = dbLogs
                 }
         }
     }
-
 }

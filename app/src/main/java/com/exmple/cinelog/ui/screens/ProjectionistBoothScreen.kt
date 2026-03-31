@@ -64,6 +64,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.exmple.cinelog.ui.screens.projectionist.Message
+import com.exmple.cinelog.ui.screens.projectionist.ProjectionistBoothViewModel
 import com.exmple.cinelog.ui.theme.bounceClick
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface

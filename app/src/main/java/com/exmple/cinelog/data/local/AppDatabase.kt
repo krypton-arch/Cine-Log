@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.exmple.cinelog.data.local.dao.*
 import com.exmple.cinelog.data.local.entity.*
@@ -23,7 +24,7 @@ import kotlinx.coroutines.launch
         Challenge::class,
         AiInsightEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(DatabaseConverters::class)
@@ -46,11 +47,52 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "cinelog_database"
                 )
+                .addMigrations(MIGRATION_5_6, MIGRATION_6_7)
                 .addCallback(SeedCallback(context))
-                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `ai_insights` (
+                        `id` INTEGER NOT NULL,
+                        `insightText` TEXT NOT NULL,
+                        `generatedAt` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `ai_insights_new` (
+                        `id` INTEGER NOT NULL,
+                        `insightText` TEXT,
+                        `generatedAt` INTEGER,
+                        `conversationJson` TEXT,
+                        `conversationUpdatedAt` INTEGER,
+                        PRIMARY KEY(`id`)
+                    )
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    """
+                    INSERT INTO `ai_insights_new` (`id`, `insightText`, `generatedAt`)
+                    SELECT `id`, `insightText`, `generatedAt`
+                    FROM `ai_insights`
+                    """.trimIndent()
+                )
+                database.execSQL("DROP TABLE `ai_insights`")
+                database.execSQL("ALTER TABLE `ai_insights_new` RENAME TO `ai_insights`")
             }
         }
     }
