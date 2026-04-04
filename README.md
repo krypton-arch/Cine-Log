@@ -94,11 +94,11 @@ Dependency injection via Hilt. All repositories and `GamificationManager` are `@
 
 ## Download
 
-### [CineLog-v2.4-ArchiveRefresh.apk](https://github.com/krypton-arch/Cine-Log/blob/main/releases/CineLog-v2.4-ArchiveRefresh.apk)
+### [CineLog-v2.5-Mainline.apk](https://github.com/krypton-arch/Cine-Log/raw/main/releases/CineLog-v2.5-Mainline.apk)
 
 1. Download to your Android device (Android 7.0+, API 24).
 2. Allow installs from unknown sources if prompted.
-3. This build includes the diary, library, and home screen refresh plus the month-scoped profile challenge system.
+3. This build includes all merged updates currently on `main`, including the archive refresh and monthly challenge improvements.
 4. The release artifact is signed with the Android debug keystore, not a production release key.
 5. Projectionist's Booth uses the hosted Gemini relay, so no client-side Gemini key is required.
 6. Your archive data stays on-device, so back it up before switching phones.
