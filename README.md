@@ -108,6 +108,7 @@ Badge logic is idempotent — `checkBadges()` can be called multiple times witho
 
 Clean MVVM with strict 3-layer separation. No shortcuts, no concerns leaking between layers.
 
+```
 
 app/
 ├── data/
@@ -125,6 +126,8 @@ app/
 ├── di/                 # Hilt modules
 ├── utils/              # rethrowIfCancellation, extensions
 └── worker/             # Background WorkManager tasks
+
+```
 
 
 **Data flow:** Room `Flow<>` → Repository → `combine()` in ViewModel → `UiState` data class → Composable via `collectAsState()`. No business logic in Composables. No direct DAO access outside repositories.
