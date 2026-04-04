@@ -109,7 +109,6 @@ class DiaryViewModel @Inject constructor(
     fun updateLogEntry(logEntry: LogEntry) {
         viewModelScope.launch {
             repository.updateLogEntry(logEntry)
-            gamificationManager.syncMonthlyChallenge()
         }
     }
 

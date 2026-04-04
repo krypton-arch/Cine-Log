@@ -90,7 +90,6 @@ class LoggingViewModel @Inject constructor(
     fun updateEntry(entry: LogEntry, onComplete: () -> Unit = {}) {
         viewModelScope.launch {
             logRepository.updateLogEntry(entry)
-            gamificationManager.syncMonthlyChallenge()
             // Do NOT call GamificationManager or logMovie — no XP on edits
             resetForm()
             onComplete()
