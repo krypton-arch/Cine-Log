@@ -67,14 +67,15 @@ CineLog follows a luxury noir visual system:
 
 Latest APK:
 
-### [CineLog-v2.3-PublicRelay.apk](https://github.com/krypton-arch/Cine-Log/blob/main/releases/CineLog-v2.3-PublicRelay.apk)
+### [CineLog-v2.4-ArchiveRefresh.apk](releases/CineLog-v2.4-ArchiveRefresh.apk)
 
 1. Download the APK to your Android device.
 2. Open it to install. You may need to allow installs from unknown sources.
-3. This build uses the restored original launcher artwork and is packaged as a signed release APK.
-4. The current release artifact is signed with the Android debug keystore, not a production release key.
-5. Projectionist's Booth is configured to use the hosted public Gemini relay instead of a client-side Gemini secret.
-6. Your archive data stays on-device, so back it up if you move to a new phone.
+3. This build includes the diary, library, and home screen refresh plus the new month-scoped profile challenge system.
+4. It is packaged as a signed release APK.
+5. The current release artifact is signed with the Android debug keystore, not a production release key.
+6. Projectionist's Booth is configured to use the hosted public Gemini relay instead of a client-side Gemini secret.
+7. Your archive data stays on-device, so back it up if you move to a new phone.
 
 ---
 
