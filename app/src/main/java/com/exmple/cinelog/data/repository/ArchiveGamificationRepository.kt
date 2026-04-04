@@ -51,6 +51,14 @@ class ArchiveGamificationRepository @Inject constructor(
         return gamificationDao.getActiveChallenges()
     }
 
+    suspend fun getChallengeById(challengeId: String): Challenge? {
+        return gamificationDao.getChallengeById(challengeId)
+    }
+
+    suspend fun upsertChallenge(challenge: Challenge) {
+        gamificationDao.insertChallenges(listOf(challenge))
+    }
+
     suspend fun completeChallenge(challenge: Challenge) {
         val completedChallenge = challenge.copy(isCompleted = true, currentCount = challenge.targetCount)
         gamificationDao.updateChallenge(completedChallenge)

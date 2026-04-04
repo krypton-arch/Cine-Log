@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.exmple.cinelog.data.local.entity.Priority
 import com.exmple.cinelog.data.local.entity.WatchlistEntry
@@ -31,9 +32,11 @@ interface WatchlistDao {
     @Delete
     suspend fun deleteWatchlistEntry(entry: WatchlistEntry)
 
+    @Transaction
     @Query("SELECT * FROM watchlist ORDER BY addedDate DESC")
     fun getAllWatchlistItems(): Flow<List<WatchlistItemWithMovie>>
 
+    @Transaction
     @Query("SELECT * FROM watchlist WHERE priority = :priority ORDER BY addedDate DESC")
     fun getWatchlistByPriority(priority: Priority): Flow<List<WatchlistItemWithMovie>>
 

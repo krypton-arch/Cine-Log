@@ -1,12 +1,14 @@
 package com.exmple.cinelog.domain
 
+import com.exmple.cinelog.data.local.dao.LogWithMovie
+import com.exmple.cinelog.data.local.entity.Challenge
 import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.UserProfile
 import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.LogRepository
 import kotlinx.coroutines.flow.firstOrNull
-import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 
 import javax.inject.Inject
@@ -101,6 +103,23 @@ class GamificationManager @Inject constructor(
         checkBadges(updatedProfile)
     }
 
+    fun buildCurrentMonthlyChallengeSnapshot(
+        challenges: List<Challenge>,
+        logs: List<LogWithMovie>,
+        zoneId: ZoneId = ZoneId.systemDefault()
+    ): MonthlyChallengeSnapshot? {
+        val currentMonth = YearMonth.now(zoneId)
+        val currentChallenge = challenges.firstOrNull {
+            it.challengeId == MonthlyChallengeEngine.challengeIdForMonth(currentMonth)
+        } ?: MonthlyChallengeEngine.challengeForMonth(currentMonth, zoneId)
+
+        return MonthlyChallengeEngine.buildSnapshot(
+            challenge = currentChallenge,
+            logs = logs,
+            zoneId = zoneId
+        )
+    }
+
     suspend fun checkBadges(profile: UserProfile? = null) {
         val unlockedBadges = archiveGamificationRepository.getUnlockedBadges().firstOrNull()?.map { it.badgeId } ?: emptyList()
         val logs = logRepository.getAllLogs().firstOrNull() ?: emptyList()
@@ -174,41 +193,43 @@ class GamificationManager @Inject constructor(
         }
     }
 
-    suspend fun checkChallenges() {
-        val activeChallenges = archiveGamificationRepository.getActiveChallenges().firstOrNull() ?: return
+    suspend fun syncMonthlyChallenge(zoneId: ZoneId = ZoneId.systemDefault()) {
+        val currentMonth = YearMonth.now(zoneId)
+        val challengeId = MonthlyChallengeEngine.challengeIdForMonth(currentMonth)
+        val currentChallenge = archiveGamificationRepository.getChallengeById(challengeId)
+            ?: MonthlyChallengeEngine.challengeForMonth(currentMonth, zoneId).also {
+                archiveGamificationRepository.upsertChallenge(it)
+            }
+
         val logs = logRepository.getAllLogs().firstOrNull() ?: emptyList()
-        
-        activeChallenges.forEach { challenge ->
-            val newCount = when (challenge.challengeId) {
-                "indie_films" -> {
-                    logs.count { 
-                        it.movie.genres.contains("Drama", ignoreCase = true) || 
-                        it.movie.genres.contains("Noir", ignoreCase = true) ||
-                        it.movie.genres.contains("Indie", ignoreCase = true)
-                    }
-                }
-                "weekend_warrior" -> {
-                    val now = System.currentTimeMillis()
-                    val weekAgo = now - 7 * 24 * 60 * 60 * 1000L
-                    logs.count { it.logEntry.watchDate >= weekAgo }
-                }
-                "genre_explorer" -> {
-                    logs.flatMap { it.movie.genres.split(",").map { g -> g.trim() } }
-                        .filter { it.isNotEmpty() }
-                        .distinct()
-                        .size
-                }
-                "review_streak" -> {
-                    logs.count { !it.logEntry.review.isNullOrBlank() }
-                }
-                else -> challenge.currentCount
-            }
-            
-            archiveGamificationRepository.updateChallengeProgress(challenge, minOf(newCount, challenge.targetCount))
-            
-            if (newCount >= challenge.targetCount && !challenge.isCompleted) {
-                archiveGamificationRepository.completeChallenge(challenge)
-            }
+        val rawProgress = MonthlyChallengeEngine.evaluateProgress(currentChallenge, logs, zoneId)
+        val cappedProgress = rawProgress.coerceIn(0, currentChallenge.targetCount)
+
+        if (!currentChallenge.isCompleted && cappedProgress != currentChallenge.currentCount) {
+            archiveGamificationRepository.updateChallengeProgress(currentChallenge, cappedProgress)
         }
+
+        if (rawProgress >= currentChallenge.targetCount && !currentChallenge.isCompleted) {
+            archiveGamificationRepository.completeChallenge(currentChallenge.copy(currentCount = cappedProgress))
+            awardMonthlyChallengeXp(currentChallenge)
+        }
+    }
+
+    suspend fun checkChallenges() {
+        syncMonthlyChallenge()
+    }
+
+    private suspend fun awardMonthlyChallengeXp(challenge: Challenge) {
+        val rewardXp = MonthlyChallengeEngine.rewardXpForChallenge(challenge)
+        if (rewardXp <= 0) return
+
+        val profile = archiveGamificationRepository.getUserProfile().firstOrNull() ?: return
+        val newXp = profile.xp + rewardXp
+        archiveGamificationRepository.updateProfile(
+            profile.copy(
+                xp = newXp,
+                level = calculateLevel(newXp)
+            )
+        )
     }
 }

@@ -1,6 +1,5 @@
 package com.exmple.cinelog.ui.screens
 
-import android.app.Application
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,8 +17,8 @@ import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
-import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.outlined.LocalMovies
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,15 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.exmple.cinelog.data.local.dao.WatchlistItemWithMovie
 import com.exmple.cinelog.data.remote.RemoteMovie
+import com.exmple.cinelog.ui.theme.NoirBackdrop
 import com.exmple.cinelog.ui.theme.bounceClick
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
@@ -110,29 +108,46 @@ fun WatchlistScreen(
         )
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 24.dp)
-            .padding(top = 32.dp, bottom = 16.dp)
     ) {
+        NoirBackdrop(modifier = Modifier.fillMaxSize())
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .padding(top = 28.dp, bottom = 16.dp)
+        ) {
         // ── Header ──
         Text(
-            "LIBRARY",
-            style = MaterialTheme.typography.displaySmall.copy(letterSpacing = 4.sp),
+            "PRIVATE SHELVES",
+            style = MaterialTheme.typography.labelSmall.copy(
+                letterSpacing = 2.4.sp,
+                fontWeight = FontWeight.Bold
+            ),
             color = MaterialTheme.colorScheme.primaryContainer
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            "${watchlist.size} artifacts in your private archive.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-        )
-        
-        Spacer(modifier = Modifier.height(24.dp))
+
+        Spacer(modifier = Modifier.height(12.dp))
         
         // ── Search Bar ──
+        LibraryMasthead(
+            itemCount = watchlist.size,
+            searchQuery = searchQuery,
+            onSearchChange = {
+                searchQuery = it
+                viewModel.searchMovies(it)
+            }
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+        Box(modifier = Modifier.fillMaxWidth().height(1.dp).regalDivider())
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (false) {
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { 
@@ -167,6 +182,13 @@ fun WatchlistScreen(
         
         Spacer(modifier = Modifier.height(24.dp))
 
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
         if (searchQuery.isNotEmpty()) {
             // ═══ SEARCH RESULTS ═══
             if (isSearching) {
@@ -264,17 +286,18 @@ fun WatchlistScreen(
         } else {
             // ═══ WATCHLIST ITEMS ═══
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+                columns = if (isGridView) GridCells.Adaptive(minSize = 132.dp) else GridCells.Fixed(1),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.animateContentSize()
+                modifier = Modifier.animateContentSize(),
+                contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 // Carousel Header
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     val highlights = watchlist.take(5)
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
-                            "HIGHLIGHTS",
+                            "FEATURED TITLES",
                             style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.primaryContainer
                         )
@@ -296,11 +319,18 @@ fun WatchlistScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            "YOUR ARCHIVE",
-                            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                "YOUR ARCHIVE",
+                                style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "${watchlist.size} saved films",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+                            )
+                        }
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.glassSurface(cornerRadius = 12.dp, alpha = 0.2f).padding(4.dp)
@@ -311,7 +341,7 @@ fun WatchlistScreen(
                                     if (!isGridView) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent,
                                     RoundedCornerShape(8.dp)
                                 )
-                            ) { Icon(Icons.Default.ViewList, contentDescription = "List", modifier = Modifier.size(18.dp), tint = if (!isGridView) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant) }
+                            ) { Icon(Icons.AutoMirrored.Filled.ViewList, contentDescription = "List", modifier = Modifier.size(18.dp), tint = if (!isGridView) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant) }
                             IconButton(
                                 onClick = { isGridView = true },
                                 modifier = Modifier.size(32.dp).background(
@@ -345,12 +375,100 @@ fun WatchlistScreen(
                 }
             }
         }
+        }
     }
 }
 
 // ═════════════════════════════════════════════════════════
 // Watchlist Movie Card — Rich Detail View
 // ═════════════════════════════════════════════════════════
+
+}
+
+@Composable
+private fun LibraryMasthead(
+    itemCount: Int,
+    searchQuery: String,
+    onSearchChange: (String) -> Unit
+) {
+    val supporting = if (itemCount > 0) {
+        "$itemCount artifacts in your private archive."
+    } else {
+        "Search, collect, and hold onto films worth returning to."
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassCard(cornerRadius = 28.dp, alpha = 0.44f, borderAlpha = 0.12f)
+            .padding(horizontal = 20.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    "Library",
+                    style = MaterialTheme.typography.displaySmall.copy(letterSpacing = 1.sp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                )
+                Text(
+                    supporting,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.76f)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .glassSurface(cornerRadius = 999.dp, alpha = 0.24f)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    "$itemCount SAVED",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 1.8.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            placeholder = {
+                Text(
+                    "Search to add to archive...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.44f)
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primaryContainer
+                )
+            },
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.72f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.56f),
+                focusedBorderColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
+                unfocusedBorderColor = Color.Transparent
+            ),
+            singleLine = true
+        )
+    }
+}
 
 @Composable
 fun WatchlistMovieCard(

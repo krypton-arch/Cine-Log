@@ -1,5 +1,7 @@
 package com.exmple.cinelog.data.repository
 
+import androidx.room.withTransaction
+import com.exmple.cinelog.data.local.AppDatabase
 import com.exmple.cinelog.data.local.dao.MovieDao
 import com.exmple.cinelog.data.local.dao.WatchlistDao
 import com.exmple.cinelog.data.local.dao.WatchlistItemWithMovie
@@ -13,6 +15,7 @@ import javax.inject.Singleton
 
 @Singleton
 class WatchlistRepository @Inject constructor(
+    private val database: AppDatabase,
     private val watchlistDao: WatchlistDao,
     private val movieDao: MovieDao
 ) {
@@ -25,15 +28,16 @@ class WatchlistRepository @Inject constructor(
     }
 
     suspend fun addToWatchlist(movie: MovieEntity, priority: Priority, notes: String? = null) {
-        // Cache movie first
-        movieDao.insertMovie(movie)
         val entry = WatchlistEntry(
             movieId = movie.movieId,
             priority = priority,
             addedDate = System.currentTimeMillis(),
             notes = notes
         )
-        watchlistDao.insertWatchlistEntry(entry)
+        database.withTransaction {
+            movieDao.upsertMovie(movie)
+            watchlistDao.insertWatchlistEntry(entry)
+        }
     }
 
     suspend fun updateWatchlistEntry(entry: WatchlistEntry) {

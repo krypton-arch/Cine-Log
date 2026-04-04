@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.exmple.cinelog.data.local.entity.LogEntry
 import com.exmple.cinelog.data.local.entity.MovieEntity
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
@@ -40,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun LogMovieSheet(
     movie: MovieEntity,
     wasOnWatchlist: Boolean = false,
+    existingEntry: LogEntry? = null,
     viewModel: LoggingViewModel = hiltViewModel(),
     onLogComplete: () -> Unit,
     onDismissRequest: () -> Unit
@@ -47,6 +49,17 @@ fun LogMovieSheet(
     val rating by viewModel.rating.collectAsState()
     val reviewText by viewModel.reviewText.collectAsState()
     val selectedAtmosphere by viewModel.selectedAtmosphere.collectAsState()
+
+    val isEditMode = existingEntry != null
+
+    // Pre-fill fields when in edit mode
+    LaunchedEffect(existingEntry, movie.movieId) {
+        if (existingEntry != null) {
+            viewModel.prefillFromEntry(existingEntry)
+        } else {
+            viewModel.resetForm()
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -102,8 +115,19 @@ fun LogMovieSheet(
                 // Quick Save Action in Header
                 IconButton(
                     onClick = {
-                        viewModel.logMovie(movie, wasOnWatchlist) {
-                            onLogComplete()
+                        if (isEditMode) {
+                            val updated = existingEntry!!.copy(
+                                rating = rating,
+                                review = reviewText,
+                                moodTag = selectedAtmosphere
+                            )
+                            viewModel.updateEntry(updated) {
+                                onLogComplete()
+                            }
+                        } else {
+                            viewModel.logMovie(movie, wasOnWatchlist) {
+                                onLogComplete()
+                            }
                         }
                     },
                     modifier = Modifier.glassSurface(cornerRadius = 12.dp, alpha = 0.5f)
@@ -124,7 +148,14 @@ fun LogMovieSheet(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("LOG DATE", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f))
                     OutlinedTextField(
-                        value = LocalDate.now().toString(),
+                        value = if (isEditMode) {
+                            java.time.Instant.ofEpochMilli(existingEntry!!.watchDate)
+                                .atZone(java.time.ZoneId.systemDefault())
+                                .toLocalDate()
+                                .toString()
+                        } else {
+                            LocalDate.now().toString()
+                        },
                         onValueChange = {},
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         readOnly = true,
@@ -214,8 +245,19 @@ fun LogMovieSheet(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Button(
                         onClick = {
-                            viewModel.logMovie(movie, wasOnWatchlist) {
-                                onLogComplete()
+                            if (isEditMode) {
+                                val updated = existingEntry!!.copy(
+                                    rating = rating,
+                                    review = reviewText,
+                                    moodTag = selectedAtmosphere
+                                )
+                                viewModel.updateEntry(updated) {
+                                    onLogComplete()
+                                }
+                            } else {
+                                viewModel.logMovie(movie, wasOnWatchlist) {
+                                    onLogComplete()
+                                }
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -227,13 +269,22 @@ fun LogMovieSheet(
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                            Text("SAVE ARCHIVE ENTRY", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp), maxLines = 1)
+                            Text(
+                                if (isEditMode) "UPDATE ENTRY" else "SAVE ARCHIVE ENTRY",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 2.sp),
+                                maxLines = 1
+                            )
                             Spacer(Modifier.width(8.dp))
                             Icon(Icons.Default.Done, contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("ARTIFACT WILL BE ARCHIVED", style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 2.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f), modifier = Modifier.align(Alignment.CenterHorizontally))
+                    Text(
+                        if (isEditMode) "ENTRY WILL BE UPDATED" else "ARTIFACT WILL BE ARCHIVED",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, letterSpacing = 2.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
                 }
             }
         }

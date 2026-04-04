@@ -29,6 +29,9 @@ interface GamificationDao {
     @Query("SELECT * FROM challenges WHERE isCompleted = 0")
     fun getActiveChallenges(): Flow<List<Challenge>>
 
+    @Query("SELECT * FROM challenges WHERE challengeId = :challengeId LIMIT 1")
+    suspend fun getChallengeById(challengeId: String): Challenge?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChallenges(challenges: List<Challenge>)
 

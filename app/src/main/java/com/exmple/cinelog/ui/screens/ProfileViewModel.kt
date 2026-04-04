@@ -4,13 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.exmple.cinelog.data.local.entity.AiInsightEntity
 import com.exmple.cinelog.data.local.entity.Badge
-import com.exmple.cinelog.data.local.entity.Challenge
 import com.exmple.cinelog.data.local.entity.UserProfile
 import com.exmple.cinelog.data.repository.AiRepository
 import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.GeminiRepository
 import com.exmple.cinelog.data.repository.LogRepository
 import com.exmple.cinelog.domain.GamificationManager
+import com.exmple.cinelog.domain.MonthlyChallengeSnapshot
 import com.exmple.cinelog.domain.ProjectionistContext
 import com.exmple.cinelog.domain.PromptAssembler
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +30,7 @@ data class ProfileUiState(
     val avgRating: Float = 0f,
     val totalFilms: Int = 0,
     val topGenres: List<Pair<String, Float>> = emptyList(),
-    val activeChallenge: Challenge? = null,
+    val monthlyChallenge: MonthlyChallengeSnapshot? = null,
     val favoriteDecade: String = "N/A",
     val topDirector: String = "N/A",
     val dailyInsight: String? = null
@@ -50,11 +50,15 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            gamificationManager.syncMonthlyChallenge()
+        }
+
+        viewModelScope.launch {
             combine(
                 archiveGamificationRepository.getUserProfile(),
                 archiveGamificationRepository.getAllBadges(),
                 logRepository.getAllLogs(),
-                archiveGamificationRepository.getActiveChallenges(),
+                archiveGamificationRepository.getAllChallenges(),
                 aiRepository.getDailyInsight()
             ) { profile, badges, logs, challenges, cachedInsight ->
 
@@ -106,7 +110,10 @@ class ProfileViewModel @Inject constructor(
 
                 val topDirector = directorCounts.maxByOrNull { it.value }?.key ?: "NONE"
                 val favoriteDecade = decadeCounts.maxByOrNull { it.value }?.key?.let { "${it}s" } ?: "NONE"
-                val activeChallenge = challenges.firstOrNull()
+                val monthlyChallenge = gamificationManager.buildCurrentMonthlyChallengeSnapshot(
+                    challenges = challenges,
+                    logs = logs
+                )
 
                 if (logs.isNotEmpty() && (cachedInsight == null || isCacheStale(cachedInsight.generatedAt))) {
                     generateDailyInsight(
@@ -125,7 +132,7 @@ class ProfileViewModel @Inject constructor(
                     avgRating = avgRating,
                     totalFilms = logs.size,
                     topGenres = topGenres,
-                    activeChallenge = activeChallenge,
+                    monthlyChallenge = monthlyChallenge,
                     favoriteDecade = favoriteDecade,
                     topDirector = topDirector,
                     dailyInsight = cachedInsight?.insightText
