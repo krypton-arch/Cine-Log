@@ -15,6 +15,7 @@ import com.exmple.cinelog.data.repository.WatchlistRepository
 import com.exmple.cinelog.domain.GamificationManager
 import com.exmple.cinelog.utils.MainDispatcherRule
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -89,11 +90,65 @@ class ProfileViewModelTest {
         assertTrue(promptSlot.captured.contains("Favorite decade: 1970s"))
     }
 
-    private fun loggedMovie(movieId: Int, title: String, releaseYear: String): LogWithMovie {
+    @Test
+    fun `daily insight refreshes when a newer log exists than cached insight`() = runTest {
+        val promptSlot = slot<String>()
+
+        coEvery { gamificationManager.syncMonthlyChallenge(any()) } returns Unit
+        every { archiveRepo.getUserProfile() } returns flowOf(
+            UserProfile(
+                xp = 200,
+                level = 1,
+                currentStreak = 4,
+                lastLogDate = null,
+                totalFilmsWatched = 2,
+                totalMinutesWatched = 240
+            )
+        )
+        every { archiveRepo.getAllBadges() } returns flowOf(emptyList())
+        every { archiveRepo.getAllChallenges() } returns flowOf(emptyList())
+        every { logRepo.getAllLogs() } returns flowOf(
+            listOf(
+                loggedMovie(movieId = 99, title = "Fresh Log", releaseYear = "1999-09-09", watchDate = 5_000L)
+            )
+        )
+        every { watchlistRepo.getAllWatchlistItems() } returns flowOf(emptyList())
+        every { aiRepository.getDailyInsight() } returns flowOf(
+            AiInsightEntity(
+                insightText = "Old insight",
+                generatedAt = 4_000L
+            )
+        )
+        coEvery { aiRepository.saveInsight(any(), any()) } returns Unit
+        every { gamificationManager.getLevelName(any()) } returns "Cinephile"
+        every { gamificationManager.buildCurrentMonthlyChallengeSnapshot(any(), any(), any()) } returns null
+        coEvery { geminiRepository.sendMessage(capture(promptSlot), any()) } returns Result.success("Updated insight")
+
+        ProfileViewModel(
+            archiveGamificationRepository = archiveRepo,
+            logRepository = logRepo,
+            watchlistRepository = watchlistRepo,
+            gamificationManager = gamificationManager,
+            aiRepository = aiRepository,
+            geminiRepository = geminiRepository
+        )
+
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) { geminiRepository.sendMessage(any(), any()) }
+        assertTrue(promptSlot.captured.contains("Films logged recently: Fresh Log"))
+    }
+
+    private fun loggedMovie(
+        movieId: Int,
+        title: String,
+        releaseYear: String,
+        watchDate: Long = movieId.toLong()
+    ): LogWithMovie {
         return LogWithMovie(
             logEntry = com.exmple.cinelog.data.local.entity.LogEntry(
                 movieId = movieId,
-                watchDate = movieId.toLong(),
+                watchDate = watchDate,
                 rating = 4f,
                 review = "Review",
                 moodTag = null,

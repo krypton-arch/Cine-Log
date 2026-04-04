@@ -1,6 +1,5 @@
 package com.exmple.cinelog.ui.screens
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,14 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.exmple.cinelog.data.local.entity.Badge
+import com.exmple.cinelog.ui.screens.profile.GenrePassportEntry
 import com.exmple.cinelog.ui.screens.profile.ProfileViewModel
 import com.exmple.cinelog.domain.MonthlyChallengeSnapshot
 import com.exmple.cinelog.domain.MonthlyChallengeStatus
@@ -158,7 +156,10 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         // --- 5. Genre Passport ---
-        GenrePassportCard(uiState.topGenres)
+        GenrePassportCard(
+            genres = uiState.topGenres,
+            totalFilmsLogged = totalFilmsLogged
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -233,8 +234,12 @@ fun ProfileScreen(
 }
 
 @Composable
-fun GenrePassportCard(genres: List<Pair<String, Float>>) {
-    val topGenre = genres.firstOrNull() ?: ("EMPTY" to 0f)
+fun GenrePassportCard(
+    genres: List<GenrePassportEntry>,
+    totalFilmsLogged: Int
+) {
+    val topGenre = genres.firstOrNull()
+    val accentTones = listOf(1f, 0.84f, 0.68f, 0.52f, 0.36f)
 
     Column(
         modifier = Modifier
@@ -245,72 +250,212 @@ fun GenrePassportCard(genres: List<Pair<String, Float>>) {
             .padding(24.dp)
     ) {
         Text("GENRE PASSPORT", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontSize = 10.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Donut Chart
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-            val unColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
-            val fillCol = MaterialTheme.colorScheme.primaryContainer
-            val sweep = 360f * (if(genres.isEmpty()) 0f else (topGenre.second / 100f))
-            
-            Canvas(modifier = Modifier.size(130.dp)) {
-                drawArc(
-                    color = unColor,
-                    startAngle = 0f,
-                    sweepAngle = 360f,
-                    useCenter = false,
-                    style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Butt)
-                )
-                drawArc(
-                    color = fillCol,
-                    startAngle = -90f,
-                    sweepAngle = sweep,
-                    useCenter = false,
-                    style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Butt)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            "A clearer read on the genres that appear most often in your logged films.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.78f)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        if (topGenre == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.16f),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "Log a few films and we will turn your archive into an easy-to-read genre map.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
                 )
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("${topGenre.second.toInt()}%", style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp))
-                Text(topGenre.first.uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontSize = 9.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+            return
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.18f),
+                    RoundedCornerShape(18.dp)
+                )
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                "MOST PRESENT",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    letterSpacing = 1.8.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.primaryContainer
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        topGenre.name,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = PlayfairDisplayFont,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        "${topGenre.count} genre mentions across $totalFilmsLogged logged films",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                    )
+                }
+                Text(
+                    "${topGenre.percentage.toInt()}%",
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 34.sp
+                    ),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                )
             }
         }
-        
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        // Mini Progress lists
-        if (genres.isNotEmpty()) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    GenreMiniRow(genres[0].first, genres[0].second, isTop = true)
-                    if (genres.size > 2) GenreMiniRow(genres[2].first, genres[2].second, isTop = false)
-                }
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    if (genres.size > 1) GenreMiniRow(genres[1].first, genres[1].second, isTop = false)
-                    if (genres.size > 3) GenreMiniRow(genres[3].first, genres[3].second, isTop = false)
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(999.dp))
+                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f))
+                .padding(4.dp)
+                .height(16.dp)
+        ) {
+            genres.forEachIndexed { index, genre ->
+                Box(
+                    modifier = Modifier
+                        .weight(genre.percentage.coerceAtLeast(0.01f))
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(
+                            MaterialTheme.colorScheme.primaryContainer.copy(
+                                alpha = accentTones[index % accentTones.size]
+                            )
+                        )
+                )
+                if (index != genres.lastIndex) {
+                    Spacer(modifier = Modifier.width(4.dp))
                 }
             }
-        } else {
-            Box(modifier = Modifier.fillMaxWidth().height(40.dp), contentAlignment = Alignment.Center) {
-                Text("LOG MOVIES TO BUILD YOUR ARCHIVE", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            "Based on the genre labels attached to the films you logged. Movies with multiple genres contribute to each one.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.68f)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            genres.forEachIndexed { index, genre ->
+                GenrePassportRow(
+                    rank = index + 1,
+                    genre = genre,
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(
+                        alpha = accentTones[index % accentTones.size]
+                    )
+                )
             }
         }
     }
 }
 
 @Composable
-fun GenreMiniRow(name: String, value: Float, isTop: Boolean) {
-    Column {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(name, style = MaterialTheme.typography.titleSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold))
-            Text("${value.toInt()}%", style = MaterialTheme.typography.titleSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+fun GenrePassportRow(
+    rank: Int,
+    genre: GenrePassportEntry,
+    color: Color
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.12f))
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f),
+                            RoundedCornerShape(999.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        rank.toString(),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    )
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        genre.name,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        "${genre.count} mentions",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                    )
+                }
+            }
+            Text(
+                "${genre.percentage.toInt()}%",
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.82f)
+            )
         }
-        Spacer(modifier = Modifier.height(6.dp))
         LinearProgressIndicator(
-            progress = { value / 100f },
-            modifier = Modifier.fillMaxWidth().height(2.dp).clip(RoundedCornerShape(1.dp)),
-            color = if (isTop) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
-            trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+            progress = { genre.percentage / 100f },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(RoundedCornerShape(999.dp)),
+            color = color,
+            trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f)
         )
     }
 }

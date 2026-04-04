@@ -36,11 +36,17 @@ data class ProfileUiState(
     val totalHours: Int = 0,
     val avgRating: Float = 0f,
     val totalFilms: Int = 0,
-    val topGenres: List<Pair<String, Float>> = emptyList(),
+    val topGenres: List<GenrePassportEntry> = emptyList(),
     val monthlyChallenge: MonthlyChallengeSnapshot? = null,
     val favoriteDecade: String = "N/A",
     val topDirector: String = "N/A",
     val dailyInsight: String? = null
+)
+
+data class GenrePassportEntry(
+    val name: String,
+    val percentage: Float,
+    val count: Int
 )
 
 private data class ProfileSourceData(
@@ -64,6 +70,7 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
     private var insightRefreshInFlight = false
+    private var lastInsightContextKey: String? = null
 
     init {
         viewModelScope.launch {
@@ -136,10 +143,17 @@ class ProfileViewModel @Inject constructor(
 
                 val totalHours = totalMinutes / 60
                 val avgRating = if (countWithRating > 0) totalRating / countWithRating else 0f
+                val totalGenreMentions = genreCounts.values.sum()
                 val topGenres = genreCounts.entries
                     .sortedByDescending { it.value }
-                    .take(4)
-                    .map { it.key to (it.value.toFloat() / maxOf(1, genreCounts.values.sum())) * 100 }
+                    .take(5)
+                    .map {
+                        GenrePassportEntry(
+                            name = it.key,
+                            percentage = (it.value.toFloat() / maxOf(1, totalGenreMentions)) * 100,
+                            count = it.value
+                        )
+                    }
 
                 val topDirector = directorCounts.maxByOrNull { it.value }?.key ?: "NONE"
                 val favoriteDecade = decadeCounts.maxByOrNull { it.value }?.key?.let { "${it}s" } ?: "NONE"
@@ -147,15 +161,45 @@ class ProfileViewModel @Inject constructor(
                     challenges = challenges,
                     logs = logs
                 )
+                val recentLogTitles = logs.take(10).map { it.movie.title }
+                val watchlistTop5 = watchlistItems.take(5).map { it.movie }
+                val latestLogTimestamp = logs.maxOfOrNull { it.logEntry.watchDate }
+                val insightContextKey = buildInsightContextKey(
+                    recentLogs = recentLogTitles,
+                    watchlistTop5 = watchlistTop5,
+                    total = logs.size,
+                    genre = topGenres.firstOrNull()?.name ?: "Unknown",
+                    decade = favoriteDecade,
+                    director = topDirector
+                )
 
-                if (shouldRefreshInsight(logs.isNotEmpty(), cachedInsight)) {
+                cachedInsight?.generatedAt?.let { generatedAt ->
+                    if (
+                        lastInsightContextKey == null &&
+                        latestLogTimestamp != null &&
+                        latestLogTimestamp <= generatedAt &&
+                        !isCacheStale(generatedAt)
+                    ) {
+                        lastInsightContextKey = insightContextKey
+                    }
+                }
+
+                if (
+                    shouldRefreshInsight(
+                        hasLogs = logs.isNotEmpty(),
+                        cachedInsight = cachedInsight,
+                        latestLogTimestamp = latestLogTimestamp,
+                        currentContextKey = insightContextKey
+                    )
+                ) {
                     requestDailyInsight(
-                        recentLogs = logs.take(10).map { it.movie.title },
-                        watchlistTop5 = watchlistItems.take(5).map { it.movie },
+                        recentLogs = recentLogTitles,
+                        watchlistTop5 = watchlistTop5,
                         total = logs.size,
-                        genre = topGenres.firstOrNull()?.first ?: "Unknown",
+                        genre = topGenres.firstOrNull()?.name ?: "Unknown",
                         decade = favoriteDecade,
-                        director = topDirector
+                        director = topDirector,
+                        contextKey = insightContextKey
                     )
                 }
 
@@ -184,14 +228,18 @@ class ProfileViewModel @Inject constructor(
 
     private fun shouldRefreshInsight(
         hasLogs: Boolean,
-        cachedInsight: AiInsightEntity?
+        cachedInsight: AiInsightEntity?,
+        latestLogTimestamp: Long?,
+        currentContextKey: String
     ): Boolean {
         if (!hasLogs || insightRefreshInFlight) {
             return false
         }
 
         val generatedAt = cachedInsight?.generatedAt ?: return true
-        return isCacheStale(generatedAt)
+        return isCacheStale(generatedAt) ||
+            (latestLogTimestamp != null && latestLogTimestamp > generatedAt) ||
+            (lastInsightContextKey != null && lastInsightContextKey != currentContextKey)
     }
 
     private fun isCacheStale(generatedAt: Long): Boolean {
@@ -205,7 +253,8 @@ class ProfileViewModel @Inject constructor(
         total: Int,
         genre: String,
         decade: String,
-        director: String
+        director: String,
+        contextKey: String
     ) {
         insightRefreshInFlight = true
         viewModelScope.launch {
@@ -230,6 +279,7 @@ class ProfileViewModel @Inject constructor(
                         insightText = insightText,
                         generatedAt = System.currentTimeMillis()
                     )
+                    lastInsightContextKey = contextKey
                 } else {
                     result.exceptionOrNull()?.let { error ->
                         error.rethrowIfCancellation()
@@ -242,6 +292,29 @@ class ProfileViewModel @Inject constructor(
             } finally {
                 insightRefreshInFlight = false
             }
+        }
+    }
+
+    private fun buildInsightContextKey(
+        recentLogs: List<String>,
+        watchlistTop5: List<MovieEntity>,
+        total: Int,
+        genre: String,
+        decade: String,
+        director: String
+    ): String {
+        return buildString {
+            append(total)
+            append('|')
+            append(genre)
+            append('|')
+            append(decade)
+            append('|')
+            append(director)
+            append('|')
+            append(recentLogs.joinToString("~"))
+            append('|')
+            append(watchlistTop5.joinToString("~") { it.title })
         }
     }
 }
