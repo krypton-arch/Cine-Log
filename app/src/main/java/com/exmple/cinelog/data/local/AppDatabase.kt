@@ -9,10 +9,13 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.exmple.cinelog.data.local.dao.*
 import com.exmple.cinelog.data.local.entity.*
+import com.exmple.cinelog.domain.MonthlyChallengeEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.time.YearMonth
+import java.time.ZoneId
 
 @Database(
     entities = [
@@ -202,44 +205,9 @@ suspend fun seedDatabase(db: AppDatabase) {
     )
     db.gamificationDao().insertBadges(badges)
 
-    // Seed challenges
-    val challenges = listOf(
-        Challenge(
-            challengeId = "indie_films",
-            title = "Watch 5 Indie Films",
-            description = "Experience the raw essence of independent cinema this month.",
-            targetCount = 5,
-            currentCount = 0,
-            deadline = null,
-            isCompleted = false
-        ),
-        Challenge(
-            challengeId = "weekend_warrior",
-            title = "Weekend Warrior",
-            description = "Watch 3 movies this weekend",
-            targetCount = 3,
-            currentCount = 0,
-            deadline = null,
-            isCompleted = false
-        ),
-        Challenge(
-            challengeId = "genre_explorer",
-            title = "Genre Explorer",
-            description = "Watch films from 5 different genres",
-            targetCount = 5,
-            currentCount = 0,
-            deadline = null,
-            isCompleted = false
-        ),
-        Challenge(
-            challengeId = "review_streak",
-            title = "Review Streak",
-            description = "Write reviews for 5 consecutive logs",
-            targetCount = 5,
-            currentCount = 0,
-            deadline = null,
-            isCompleted = false
-        )
+    val currentMonthlyChallenge = MonthlyChallengeEngine.challengeForMonth(
+        yearMonth = YearMonth.now(),
+        zoneId = ZoneId.systemDefault()
     )
-    db.gamificationDao().insertChallenges(challenges)
+    db.gamificationDao().insertChallenges(listOf(currentMonthlyChallenge))
 }

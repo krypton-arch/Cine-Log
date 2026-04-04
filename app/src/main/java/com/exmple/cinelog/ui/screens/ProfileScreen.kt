@@ -9,6 +9,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -26,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.exmple.cinelog.data.local.entity.Badge
 import com.exmple.cinelog.ui.screens.profile.ProfileViewModel
+import com.exmple.cinelog.domain.MonthlyChallengeSnapshot
+import com.exmple.cinelog.domain.MonthlyChallengeStatus
 import com.exmple.cinelog.ui.theme.PlayfairDisplayFont
 import androidx.hilt.navigation.compose.hiltViewModel
 
@@ -212,14 +217,9 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         // --- 8. Monthly Challenge ---
-        val actChal = uiState.activeChallenge
-        if (actChal != null) {
-            MonthlyChallengeCard(
-                title = actChal.title,
-                desc = actChal.description,
-                current = actChal.currentCount,
-                target = actChal.targetCount
-            )
+        val monthlyChallenge = uiState.monthlyChallenge
+        if (monthlyChallenge != null) {
+            MonthlyChallengeCard(challenge = monthlyChallenge)
             Spacer(modifier = Modifier.height(48.dp))
         }
 
@@ -244,7 +244,7 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text("$streak Days", style = MaterialTheme.typography.titleMedium.copy(fontFamily = PlayfairDisplayFont, fontWeight = FontWeight.Bold, fontSize = 18.sp), color = MaterialTheme.colorScheme.onSurface)
             }
-            Icon(Icons.Outlined.ShowChart, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), modifier = Modifier.padding(end = 20.dp))
+            Icon(Icons.AutoMirrored.Outlined.ShowChart, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), modifier = Modifier.padding(end = 20.dp))
         }
     }
 }
@@ -465,8 +465,13 @@ fun BadgeDetailContent(badge: Badge) {
 }
 
 @Composable
-fun MonthlyChallengeCard(title: String, desc: String, current: Int, target: Int) {
-    val pct = (current.toFloat() / target).coerceIn(0f, 1f)
+fun MonthlyChallengeCard(challenge: MonthlyChallengeSnapshot) {
+    val accentColor = if (challenge.status == MonthlyChallengeStatus.COMPLETED) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -475,39 +480,143 @@ fun MonthlyChallengeCard(title: String, desc: String, current: Int, target: Int)
             .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f), shape = RoundedCornerShape(12.dp))
             .padding(24.dp)
     ) {
-        Text("MONTHLY CHALLENGE", style = MaterialTheme.typography.titleMedium.copy(fontFamily = PlayfairDisplayFont, fontStyle = FontStyle.Italic, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.primaryContainer)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(title, style = MaterialTheme.typography.titleLarge.copy(fontFamily = PlayfairDisplayFont, fontWeight = FontWeight.Bold, fontSize = 24.sp))
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(desc, style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 18.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f))
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("$current / $target LOGGED", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontSize = 9.sp), color = MaterialTheme.colorScheme.onSurface)
-            Text("${(pct * 100).toInt()}% COMPLETE", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontSize = 9.sp), color = MaterialTheme.colorScheme.primaryContainer)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            val sections = target.coerceAtLeast(1)
-            repeat(sections) { idx ->
-                val filled = idx < current
-                val secColor = if(filled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
-                Box(modifier = Modifier.weight(1f).height(4.dp).clip(RoundedCornerShape(2.dp)).background(secColor))
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Button(
-            onClick = {}, 
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("VIEW ELIGIBLE FILMS", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp, fontSize = 11.sp, fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onPrimaryContainer)
+            Text(
+                "MONTHLY CHALLENGE",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = PlayfairDisplayFont,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = MaterialTheme.colorScheme.primaryContainer
+            )
+            Text(
+                challenge.monthLabel.uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    letterSpacing = 2.sp,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+            )
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            challenge.title,
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontFamily = PlayfairDisplayFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp
+            )
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            challenge.description,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 18.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ChallengeMetaChip(
+                label = challenge.statusLabel,
+                highlighted = challenge.status == MonthlyChallengeStatus.COMPLETED
+            )
+            ChallengeMetaChip(label = "${challenge.rewardXp} XP")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                "${challenge.currentCount} / ${challenge.targetCount}",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    letterSpacing = 2.sp,
+                    fontSize = 9.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                "${(challenge.progress * 100).toInt()}% COMPLETE",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    letterSpacing = 2.sp,
+                    fontSize = 9.sp
+                ),
+                color = MaterialTheme.colorScheme.primaryContainer
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LinearProgressIndicator(
+            progress = { challenge.progress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(RoundedCornerShape(999.dp)),
+            color = MaterialTheme.colorScheme.primaryContainer,
+            trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.16f)
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Text(
+            challenge.supportingText,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontStyle = FontStyle.Italic,
+                fontSize = 12.sp
+            ),
+            color = accentColor.copy(alpha = 0.86f)
+        )
+    }
+}
+
+@Composable
+private fun ChallengeMetaChip(
+    label: String,
+    highlighted: Boolean = false
+) {
+    val backgroundColor = if (highlighted) {
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.18f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.08f)
+    }
+    val borderColor = if (highlighted) {
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.36f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.14f)
+    }
+    val textColor = if (highlighted) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(backgroundColor)
+            .border(1.dp, borderColor, RoundedCornerShape(999.dp))
+            .padding(horizontal = 12.dp, vertical = 7.dp)
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                letterSpacing = 1.5.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            color = textColor
+        )
     }
 }
 
@@ -539,8 +648,8 @@ fun getBadgeIcon(badgeId: String): androidx.compose.ui.graphics.vector.ImageVect
         "centurion" -> Icons.Filled.Explore
         "horror_fiend" -> Icons.Filled.Movie
         "old_soul" -> Icons.Outlined.CalendarToday
-        "binge_king" -> Icons.Outlined.Assignment
-        "marathon" -> Icons.Outlined.MenuBook
+        "binge_king" -> Icons.AutoMirrored.Outlined.Assignment
+        "marathon" -> Icons.AutoMirrored.Outlined.MenuBook
         else -> Icons.Outlined.StarBorder
     }
 }

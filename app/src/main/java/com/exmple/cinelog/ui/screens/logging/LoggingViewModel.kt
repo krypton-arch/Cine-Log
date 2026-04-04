@@ -45,6 +45,18 @@ class LoggingViewModel @Inject constructor(
         }
     }
 
+    fun resetForm() {
+        _rating.value = 0f
+        _reviewText.value = ""
+        _selectedAtmosphere.value = null
+    }
+
+    fun prefillFromEntry(entry: LogEntry) {
+        _rating.value = entry.rating
+        _reviewText.value = entry.review ?: ""
+        _selectedAtmosphere.value = entry.moodTag
+    }
+
     fun logMovie(movie: MovieEntity, wasOnWatchlist: Boolean, onComplete: () -> Unit) {
         viewModelScope.launch {
             val entry = LogEntry(
@@ -67,9 +79,20 @@ class LoggingViewModel @Inject constructor(
                 wasOnWatchlist = wasOnWatchlist
             )
             
-            // 3. Update challenge progress
-            gamificationManager.checkChallenges()
+            // 3. Refresh the featured monthly challenge from source-of-truth logs
+            gamificationManager.syncMonthlyChallenge()
 
+            resetForm()
+            onComplete()
+        }
+    }
+
+    fun updateEntry(entry: LogEntry, onComplete: () -> Unit = {}) {
+        viewModelScope.launch {
+            logRepository.updateLogEntry(entry)
+            gamificationManager.syncMonthlyChallenge()
+            // Do NOT call GamificationManager or logMovie — no XP on edits
+            resetForm()
             onComplete()
         }
     }

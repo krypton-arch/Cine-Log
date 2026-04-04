@@ -19,10 +19,6 @@ class LogRepository @Inject constructor(
         return logDao.getAllLogs()
     }
 
-    fun getLogsByDateRange(startDate: Long, endDate: Long): Flow<List<LogWithMovie>> {
-        return logDao.getLogsByDateRange(startDate, endDate)
-    }
-
     fun getTotalFilmsWatched(): Flow<Int> {
         return logDao.getTotalFilmsWatched()
     }
@@ -34,5 +30,13 @@ class LogRepository @Inject constructor(
     suspend fun logMovie(movie: MovieEntity, logEntry: LogEntry) {
         movieDao.upsertMovie(movie)
         logDao.insertLog(logEntry)
+    }
+
+    suspend fun updateLogEntry(logEntry: LogEntry) {
+        logDao.updateLog(logEntry)
+    }
+
+    suspend fun deleteLogEntry(logEntry: LogEntry) {
+        logDao.deleteLog(logEntry)
     }
 }
