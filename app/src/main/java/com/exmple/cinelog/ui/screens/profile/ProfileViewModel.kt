@@ -3,13 +3,18 @@ package com.exmple.cinelog.ui.screens.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.exmple.cinelog.data.local.dao.LogWithMovie
+import com.exmple.cinelog.data.local.dao.WatchlistItemWithMovie
 import com.exmple.cinelog.data.local.entity.AiInsightEntity
 import com.exmple.cinelog.data.local.entity.Badge
+import com.exmple.cinelog.data.local.entity.Challenge
+import com.exmple.cinelog.data.local.entity.MovieEntity
 import com.exmple.cinelog.data.local.entity.UserProfile
 import com.exmple.cinelog.data.repository.AiRepository
 import com.exmple.cinelog.data.repository.ArchiveGamificationRepository
 import com.exmple.cinelog.data.repository.GeminiRepository
 import com.exmple.cinelog.data.repository.LogRepository
+import com.exmple.cinelog.data.repository.WatchlistRepository
 import com.exmple.cinelog.domain.GamificationManager
 import com.exmple.cinelog.domain.MonthlyChallengeSnapshot
 import com.exmple.cinelog.domain.ProjectionistContext
@@ -38,10 +43,19 @@ data class ProfileUiState(
     val dailyInsight: String? = null
 )
 
+private data class ProfileSourceData(
+    val profile: UserProfile?,
+    val badges: List<Badge>,
+    val logs: List<LogWithMovie>,
+    val watchlistItems: List<WatchlistItemWithMovie>,
+    val challenges: List<Challenge>
+)
+
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val archiveGamificationRepository: ArchiveGamificationRepository,
     private val logRepository: LogRepository,
+    private val watchlistRepository: WatchlistRepository,
     private val gamificationManager: GamificationManager,
     private val aiRepository: AiRepository,
     private val geminiRepository: GeminiRepository
@@ -58,12 +72,28 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             combine(
-                archiveGamificationRepository.getUserProfile(),
-                archiveGamificationRepository.getAllBadges(),
-                logRepository.getAllLogs(),
-                archiveGamificationRepository.getAllChallenges(),
+                combine(
+                    archiveGamificationRepository.getUserProfile(),
+                    archiveGamificationRepository.getAllBadges(),
+                    logRepository.getAllLogs(),
+                    watchlistRepository.getAllWatchlistItems(),
+                    archiveGamificationRepository.getAllChallenges()
+                ) { profile, badges, logs, watchlistItems, challenges ->
+                    ProfileSourceData(
+                        profile = profile,
+                        badges = badges,
+                        logs = logs,
+                        watchlistItems = watchlistItems,
+                        challenges = challenges
+                    )
+                },
                 aiRepository.getDailyInsight()
-            ) { profile, badges, logs, challenges, cachedInsight ->
+            ) { sourceData, cachedInsight ->
+                val profile = sourceData.profile
+                val badges = sourceData.badges
+                val logs = sourceData.logs
+                val watchlistItems = sourceData.watchlistItems
+                val challenges = sourceData.challenges
 
                 val levelName = profile?.level?.let { gamificationManager.getLevelName(it) } ?: "Cinephile"
 
@@ -96,7 +126,7 @@ class ProfileViewModel @Inject constructor(
 
                     val yearStr = logWithMovie.movie.releaseYear
                     if (!yearStr.isNullOrBlank()) {
-                        val year = yearStr.toIntOrNull()
+                        val year = yearStr.take(4).toIntOrNull()
                         if (year != null && year > 1800) {
                             val decade = (year / 10) * 10
                             decadeCounts[decade] = decadeCounts.getOrDefault(decade, 0) + 1
@@ -120,6 +150,8 @@ class ProfileViewModel @Inject constructor(
 
                 if (shouldRefreshInsight(logs.isNotEmpty(), cachedInsight)) {
                     requestDailyInsight(
+                        recentLogs = logs.take(10).map { it.movie.title },
+                        watchlistTop5 = watchlistItems.take(5).map { it.movie },
                         total = logs.size,
                         genre = topGenres.firstOrNull()?.first ?: "Unknown",
                         decade = favoriteDecade,
@@ -167,16 +199,23 @@ class ProfileViewModel @Inject constructor(
         return System.currentTimeMillis() - generatedAt > twentyFourHours
     }
 
-    private fun requestDailyInsight(total: Int, genre: String, decade: String, director: String) {
+    private fun requestDailyInsight(
+        recentLogs: List<String>,
+        watchlistTop5: List<MovieEntity>,
+        total: Int,
+        genre: String,
+        decade: String,
+        director: String
+    ) {
         insightRefreshInFlight = true
         viewModelScope.launch {
             try {
                 val context = ProjectionistContext(
-                    recentLogs = emptyList(),
+                    recentLogs = recentLogs,
                     topGenre = genre,
                     topDirector = director,
                     favoriteDecade = decade,
-                    watchlistTop5 = emptyList(),
+                    watchlistTop5 = watchlistTop5,
                     totalFilmsLogged = total
                 )
                 val prompt = PromptAssembler.build(context)
