@@ -28,13 +28,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,13 +41,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.exmple.cinelog.data.local.dao.LogWithMovie
 import com.exmple.cinelog.data.local.entity.LogEntry
+import com.exmple.cinelog.ui.theme.NoirBackdrop
 import com.exmple.cinelog.ui.theme.glassCard
 import com.exmple.cinelog.ui.theme.glassSurface
 import com.exmple.cinelog.ui.theme.regalDivider
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import kotlin.random.Random
 
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.exmple.cinelog.ui.screens.diary.DiaryViewModel
@@ -144,7 +141,7 @@ fun DiaryScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
     ) {
-        DiaryAtmosphere(modifier = Modifier.matchParentSize())
+        NoirBackdrop(modifier = Modifier.matchParentSize())
 
         Column(
             modifier = Modifier
@@ -175,7 +172,7 @@ fun DiaryScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Stats Bento Mini — dynamic per-month + all-time total
+            // Stats Bento Mini -- dynamic per-month + all-time total
             DiaryMonthMasthead(
                 currentYearMonth = uiState.currentYearMonth,
                 totalLogged = uiState.allLogs.size,
@@ -319,93 +316,6 @@ fun DiaryScreen(
                 }
             }
 
-            if (false) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                DiaryStatComponent(
-                    title = "WATCH TIME",
-                    value = if (uiState.monthStats.totalMinutes > 0) "${uiState.monthStats.totalMinutes / 60}h" else "—",
-                    modifier = Modifier.weight(1f)
-                )
-                DiaryStatComponent(
-                    title = "AVG RATING",
-                    value = uiState.monthStats.avgRating,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Month Header with chevrons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(width = 0.dp, color = Color.Transparent)
-                    .drawWithContent {
-                        drawRect(
-                            color = Color(0xFFF5C518),
-                            size = androidx.compose.ui.geometry.Size(4.dp.toPx(), size.height)
-                        )
-                        drawContent()
-                    }
-                    .padding(start = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                        }
-                    },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.ChevronLeft,
-                        contentDescription = "Previous month",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Crossfade(
-                    targetState = uiState.currentYearMonth,
-                    label = "month_header"
-                ) { ym ->
-                    Text(
-                        ym.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                        style = MaterialTheme.typography.headlineLarge
-                    )
-                }
-
-                IconButton(
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        }
-                    },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.ChevronRight,
-                        contentDescription = "Next month",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Month film count
-            Text(
-                "${uiState.monthStats.totalLogged} MOVIES",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             // Day-of-week headers
             Row(
@@ -428,7 +338,7 @@ fun DiaryScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // HorizontalPager calendar — use BoxWithConstraints for proper height
+            // HorizontalPager calendar -- use BoxWithConstraints for proper height
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -494,7 +404,7 @@ fun DiaryScreen(
                     }
                 ) {
                     Text(
-                        "● TODAY",
+                        "TODAY",
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 2.sp
@@ -502,7 +412,6 @@ fun DiaryScreen(
                         color = MaterialTheme.colorScheme.primaryContainer
                     )
                 }
-            }
             }
         }
 
@@ -520,7 +429,7 @@ fun DiaryScreen(
         }
     }
 
-    // ═══ CINEMATIC DAY BOTTOM SHEET ═══
+    // --- CINEMATIC DAY BOTTOM SHEET ---
     uiState.selectedDayLogs?.let { dayLogs ->
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -550,43 +459,7 @@ fun DiaryScreen(
     }
 }
 
-// ═══ CALENDAR MONTH GRID ═══
-
-@Composable
-private fun DiaryAtmosphere(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .background(Color(0xFF111111))
-            .drawWithCache {
-                val random = Random(17)
-                val particleCount = ((size.width * size.height) / 1400f)
-                    .toInt()
-                    .coerceIn(180, 520)
-
-                val particles = List(particleCount) {
-                    Triple(
-                        Offset(
-                            x = random.nextFloat() * size.width,
-                            y = random.nextFloat() * size.height
-                        ),
-                        0.2f + random.nextFloat() * 1.1f,
-                        0.015f + random.nextFloat() * 0.045f
-                    )
-                }
-
-                onDrawWithContent {
-                    drawContent()
-                    particles.forEach { (center, radius, alpha) ->
-                        drawCircle(
-                            color = Color.White.copy(alpha = alpha),
-                            radius = radius,
-                            center = center
-                        )
-                    }
-                }
-            }
-    )
-}
+// --- CALENDAR MONTH GRID ---
 
 @Composable
 private fun DiaryMonthMasthead(
@@ -822,114 +695,11 @@ private fun CalendarMonthGrid(
                                 isToday = isToday,
                                 onClick = { onDayClick(day) }
                             )
-                            if (false) {
-                            // ═══ LOGGED DAY — poster thumbnail ═══
-                            val firstPoster = dayLogs!!.first().movie.posterPath
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                    .then(
-                                        if (isToday) Modifier.border(
-                                            2.dp,
-                                            Color(0xFFF5C518),
-                                            RoundedCornerShape(8.dp)
-                                        ) else Modifier
-                                    )
-                                    .clickable { onDayClick(day) }
-                            ) {
-                                // Movie poster (desaturated)
-                                AsyncImage(
-                                    model = "https://image.tmdb.org/t/p/w200$firstPoster",
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize(),
-                                    colorFilter = ColorFilter.tint(
-                                        Color.Gray,
-                                        blendMode = BlendMode.Saturation
-                                    )
-                                )
-                                // Dark overlay
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Black.copy(alpha = 0.4f))
-                                )
-                                // Day number
-                                Text(
-                                    text = String.format("%02d", day),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(4.dp),
-                                    color = Color.White
-                                )
-                                // Multi-film badge
-                                if (dayLogs.size > 1) {
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                            .padding(4.dp)
-                                            .glassSurface(
-                                                cornerRadius = 4.dp,
-                                                alpha = 0.5f
-                                            )
-                                    ) {
-                                        Text(
-                                            text = "+${dayLogs.size - 1}",
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            color = Color.White,
-                                            modifier = Modifier.padding(
-                                                horizontal = 4.dp,
-                                                vertical = 2.dp
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                            }
                         } else {
                             EmptyCalendarDayCell(
                                 day = day,
                                 isToday = isToday
                             )
-                            if (false) {
-                            // ═══ EMPTY DAY ═══
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(
-                                        if (isToday) Color(0xFFF5C518).copy(alpha = 0.15f)
-                                        else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.3f)
-                                    )
-                                    .then(
-                                        if (isToday) Modifier.border(
-                                            1.dp,
-                                            Color(0xFFF5C518).copy(alpha = 0.5f),
-                                            RoundedCornerShape(8.dp)
-                                        ) else Modifier
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = String.format("%02d", day),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
-                                    ),
-                                    color = if (isToday) Color(0xFFF5C518)
-                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                                )
-                            }
-                        }
                     }
                     }
                 }
@@ -938,7 +708,7 @@ private fun CalendarMonthGrid(
     }
 }
 
-// ═══ CINEMATIC DAY SHEET CONTENT ═══
+// --- CINEMATIC DAY SHEET CONTENT ---
 
 @Composable
 private fun RowScope.LoggedCalendarDayCell(
@@ -1150,14 +920,14 @@ private fun CinematicDaySheetContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         if (dayLogs.size == 1) {
-            // Single film — no pager
+            // Single film -- no pager
             CinematicFilmCard(
                 logWithMovie = dayLogs.first(),
                 onEdit = onEdit,
                 onDelete = onDelete
             )
         } else {
-            // Multi-film — swipeable pager
+            // Multi-film -- swipeable pager
             val filmPagerState = rememberPagerState(
                 initialPage = 0,
                 pageCount = { dayLogs.size }
@@ -1201,7 +971,7 @@ private fun CinematicDaySheetContent(
     }
 }
 
-// ═══ CINEMATIC FILM CARD ═══
+// --- CINEMATIC FILM CARD ---
 
 @Composable
 private fun CinematicFilmCard(
@@ -1211,6 +981,9 @@ private fun CinematicFilmCard(
 ) {
     val movie = logWithMovie.movie
     val entry = logWithMovie.logEntry
+    val reviewText = entry.review
+    var isReviewExpanded by remember(entry.logId) { mutableStateOf(false) }
+    var reviewHasOverflow by remember(entry.logId) { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -1252,7 +1025,7 @@ private fun CinematicFilmCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Year • Runtime • Director
+                // Year - Runtime - Director
                 val metaParts = mutableListOf<String>()
                 movie.releaseYear?.let { metaParts.add(it) }
                 movie.runtime?.let { if (it > 0) metaParts.add("${it}m") }
@@ -1260,7 +1033,7 @@ private fun CinematicFilmCard(
 
                 if (metaParts.isNotEmpty()) {
                     Text(
-                        metaParts.joinToString(" • "),
+                        metaParts.joinToString(" - "),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -1286,7 +1059,7 @@ private fun CinematicFilmCard(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        if (entry.rating > 0) entry.rating.toString() else "—",
+                        if (entry.rating > 0) entry.rating.toString() else "--",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color(0xFFF5C518)
                     )
@@ -1317,8 +1090,8 @@ private fun CinematicFilmCard(
         }
 
         // Review text
-        if (!entry.review.isNullOrBlank()) {
-            Column {
+        if (!reviewText.isNullOrBlank()) {
+            Column(modifier = Modifier.animateContentSize()) {
                 Text(
                     "JOURNAL ENTRY",
                     style = MaterialTheme.typography.labelSmall.copy(
@@ -1329,17 +1102,33 @@ private fun CinematicFilmCard(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    entry.review!!,
+                    reviewText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 6,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 22.sp
+                    maxLines = if (isReviewExpanded) Int.MAX_VALUE else 6,
+                    overflow = if (isReviewExpanded) TextOverflow.Visible else TextOverflow.Ellipsis,
+                    lineHeight = 22.sp,
+                    onTextLayout = { reviewHasOverflow = it.hasVisualOverflow }
                 )
+                if (reviewHasOverflow || isReviewExpanded) {
+                    TextButton(
+                        onClick = { isReviewExpanded = !isReviewExpanded },
+                        contentPadding = PaddingValues(top = 8.dp)
+                    ) {
+                        Text(
+                            if (isReviewExpanded) "SHOW LESS" else "SHOW MORE",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    }
+                }
             }
         }
 
-        // Action row — Edit and Delete
+        // Action row -- Edit and Delete
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -1399,7 +1188,7 @@ private fun CinematicFilmCard(
     }
 }
 
-// ═══ UTILITY ═══
+// --- UTILITY ---
 
 private fun pageToYearMonth(page: Int, initialYearMonth: YearMonth): YearMonth {
     return initialYearMonth.plusMonths((page - CENTER_INDEX).toLong())
@@ -1411,26 +1200,3 @@ private fun calendarRowsForMonth(yearMonth: YearMonth): Int {
     return (totalCells + 6) / 7
 }
 
-// ═══ STAT COMPONENT (preserved from original) ═══
-
-@Composable
-fun DiaryStatComponent(title: String, value: String, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .glassCard(cornerRadius = 14.dp)
-            .padding(24.dp)
-    ) {
-        Text(
-            title,
-            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.5.sp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-        Text(
-            value,
-            style = MaterialTheme.typography.headlineLarge,
-            color = if (title == "TOTAL LOGGED") MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.onSurface
-        )
-    }
-}

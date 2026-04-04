@@ -214,7 +214,7 @@ object MonthlyChallengeEngine {
                 .size
             MonthlyChallengeRule.TOTAL_MINUTES -> monthLogs.sumOf { it.movie.runtime ?: 0 }
             MonthlyChallengeRule.CLASSIC_FILMS -> monthLogs.count {
-                val year = it.movie.releaseYear?.toIntOrNull()
+                val year = it.movie.releaseYear?.take(4)?.toIntOrNull()
                 year != null && year < 1980
             }
             MonthlyChallengeRule.WEEKEND_LOGS -> monthLogs.count {

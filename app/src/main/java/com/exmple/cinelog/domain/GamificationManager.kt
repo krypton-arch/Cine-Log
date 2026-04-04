@@ -143,7 +143,7 @@ class GamificationManager @Inject constructor(
         // Old Soul (10 pre-1980)
         if ("old_soul" !in unlockedBadges) {
             val oldSoulCount = logs.count {
-                val year = it.movie.releaseYear?.toIntOrNull() ?: 9999
+                val year = it.movie.releaseYear?.take(4)?.toIntOrNull() ?: 9999
                 year < 1980
             }
             if (oldSoulCount >= 10) unlockBadge("old_soul")

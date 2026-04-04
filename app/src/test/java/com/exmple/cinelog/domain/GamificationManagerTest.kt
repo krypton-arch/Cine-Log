@@ -19,6 +19,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZoneId
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GamificationManagerTest {
@@ -127,6 +129,36 @@ class GamificationManagerTest {
     }
 
     @Test
+    fun `checkBadges unlocks old_soul badge when release year includes full date`() = runTest {
+        val profile = UserProfile(xp = 0, level = 1, currentStreak = 0, lastLogDate = null, totalFilmsWatched = 0, totalMinutesWatched = 0)
+        val logs = List(10) {
+            LogWithMovie(
+                logEntry = LogEntry(movieId = it, watchDate = 0, rating = 4f, review = "", moodTag = null, isRewatch = false),
+                movie = MovieEntity(
+                    movieId = it,
+                    title = "Movie $it",
+                    posterPath = null,
+                    releaseYear = "1975-03-22",
+                    genres = "",
+                    runtime = null,
+                    director = null,
+                    overview = null
+                )
+            )
+        }
+        val badge = Badge("old_soul", "Old Soul", "", "badge_old_soul", false, 0)
+
+        coEvery { mockGamificationRepo.getUnlockedBadges() } returns flowOf(emptyList())
+        coEvery { mockLogRepo.getAllLogs() } returns flowOf(logs)
+        coEvery { mockGamificationRepo.getAllBadges() } returns flowOf(listOf(badge))
+        coEvery { mockGamificationRepo.getUserProfile() } returns flowOf(profile)
+
+        manager.checkBadges(profile)
+
+        coVerify { mockGamificationRepo.unlockBadge(badge) }
+    }
+
+    @Test
     fun `checkBadges unlocks binge_king badge`() = runTest {
         val profile = UserProfile(xp = 0, level = 1, currentStreak = 0, lastLogDate = null, totalFilmsWatched = 0, totalMinutesWatched = 0)
         val recentDate = System.currentTimeMillis() - 10000 // Very recent
@@ -149,31 +181,65 @@ class GamificationManagerTest {
 
     @Test
     fun `checkChallenges updates progress correctly`() = runTest {
-        val challenge = Challenge("review_streak", "Review Streak", "", 10, 0, null, false)
-        val logs = listOf(
-            LogWithMovie(
-                logEntry = LogEntry(movieId = 1, watchDate = 4L, rating = 5f, review = "Great", moodTag = null, isRewatch = false),
-                movie = MovieEntity(movieId = 1, title = "Movie 1", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
-            ),
-            LogWithMovie(
-                logEntry = LogEntry(movieId = 2, watchDate = 3L, rating = 4.5f, review = "Sharp", moodTag = null, isRewatch = false),
-                movie = MovieEntity(movieId = 2, title = "Movie 2", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
-            ),
-            LogWithMovie(
-                logEntry = LogEntry(movieId = 3, watchDate = 2L, rating = 4f, review = "", moodTag = null, isRewatch = false),
-                movie = MovieEntity(movieId = 3, title = "Movie 3", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
-            ),
-            LogWithMovie(
-                logEntry = LogEntry(movieId = 4, watchDate = 1L, rating = 4f, review = "Should not count", moodTag = null, isRewatch = false),
-                movie = MovieEntity(movieId = 4, title = "Movie 4", posterPath = null, releaseYear = null, genres = "", runtime = null, director = null, overview = null)
-            )
-        )
-        
-        coEvery { mockGamificationRepo.getActiveChallenges() } returns flowOf(listOf(challenge))
+        val zoneId = ZoneId.systemDefault()
+        val currentMonth = YearMonth.now(zoneId)
+        val challenge = MonthlyChallengeEngine.challengeForMonth(currentMonth, zoneId)
+        val logs = sampleMonthlyLogs(currentMonth, zoneId)
+        val expectedProgress = MonthlyChallengeEngine.evaluateProgress(challenge, logs, zoneId)
+
+        coEvery { mockGamificationRepo.getChallengeById(challenge.challengeId) } returns challenge
         coEvery { mockLogRepo.getAllLogs() } returns flowOf(logs)
 
         manager.checkChallenges()
 
-        coVerify { mockGamificationRepo.updateChallengeProgress(challenge, 2) }
+        coVerify { mockGamificationRepo.updateChallengeProgress(challenge, expectedProgress.coerceIn(0, challenge.targetCount)) }
+    }
+
+    private fun sampleMonthlyLogs(yearMonth: YearMonth, zoneId: ZoneId): List<LogWithMovie> {
+        val firstSaturday = generateSequence(yearMonth.atDay(1)) { it.plusDays(1) }
+            .first { it.month == yearMonth.month && it.dayOfWeek.value == 6 }
+        val firstSunday = generateSequence(firstSaturday) { it.plusDays(1) }
+            .first { it.month == yearMonth.month && it.dayOfWeek.value == 7 }
+        val dayThree = yearMonth.atDay(3)
+        val dayFour = yearMonth.atDay(4)
+        val dayFive = yearMonth.atDay(5)
+
+        return listOf(
+            sampleLog(movieId = 1, watchDate = firstSaturday.atStartOfDay(zoneId).toInstant().toEpochMilli(), review = "Great", genres = "Drama", runtime = 320, releaseYear = "1975-03-22"),
+            sampleLog(movieId = 2, watchDate = firstSunday.atStartOfDay(zoneId).toInstant().toEpochMilli(), review = "Sharp", genres = "Comedy", runtime = 280, releaseYear = "1968-10-29"),
+            sampleLog(movieId = 3, watchDate = dayThree.atStartOfDay(zoneId).toInstant().toEpochMilli(), review = "Layered", genres = "Sci-Fi", runtime = 240, releaseYear = "1979-08-17"),
+            sampleLog(movieId = 4, watchDate = dayFour.atStartOfDay(zoneId).toInstant().toEpochMilli(), review = "Moody", genres = "Thriller", runtime = 210, releaseYear = "1984-06-08"),
+            sampleLog(movieId = 5, watchDate = dayFive.atStartOfDay(zoneId).toInstant().toEpochMilli(), review = "", genres = "Romance", runtime = 190, releaseYear = "1994-01-01")
+        )
+    }
+
+    private fun sampleLog(
+        movieId: Int,
+        watchDate: Long,
+        review: String,
+        genres: String,
+        runtime: Int,
+        releaseYear: String
+    ): LogWithMovie {
+        return LogWithMovie(
+            logEntry = LogEntry(
+                movieId = movieId,
+                watchDate = watchDate,
+                rating = 4f,
+                review = review,
+                moodTag = null,
+                isRewatch = false
+            ),
+            movie = MovieEntity(
+                movieId = movieId,
+                title = "Movie $movieId",
+                posterPath = null,
+                releaseYear = releaseYear,
+                genres = genres,
+                runtime = runtime,
+                director = null,
+                overview = null
+            )
+        )
     }
 }

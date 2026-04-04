@@ -49,8 +49,10 @@ fun ProfileScreen(
     val level = uiState.userProfile?.level ?: 1
     val currentLevelXpFloor = when(level) { 1 -> 0; 2 -> 500; 3 -> 1000; 4 -> 2000; else -> 4000 }
     val nextLevelXp = when(level) { 1 -> 500; 2 -> 1000; 3 -> 2000; 4 -> 4000; else -> 10000 }
+    val levelProgressXp = (userScore - currentLevelXpFloor).coerceAtLeast(0)
+    val levelProgressTarget = (nextLevelXp - currentLevelXpFloor).coerceAtLeast(0)
     val progressInLevel = if (nextLevelXp > currentLevelXpFloor) {
-        ((userScore - currentLevelXpFloor).toFloat() / (nextLevelXp - currentLevelXpFloor)).coerceIn(0f, 1f)
+        (levelProgressXp.toFloat() / levelProgressTarget).coerceIn(0f, 1f)
     } else 1f
     
     val levelName = uiState.levelName
@@ -86,7 +88,7 @@ fun ProfileScreen(
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "$userScore XP • $streak 🔥",
+                    text = "$userScore XP | $streak day streak",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 11.sp),
                     color = MaterialTheme.colorScheme.primaryContainer
                 )
@@ -140,7 +142,7 @@ fun ProfileScreen(
         ) {
             Text("XP PROGRESSION", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontSize = 10.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
             Text(
-                "$userScore / $nextLevelXp XP", 
+                "$levelProgressXp / $levelProgressTarget XP", 
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = 11.sp), 
                 color = MaterialTheme.colorScheme.primaryContainer
             )
@@ -227,25 +229,6 @@ fun ProfileScreen(
         BottomDataRow("FAVORITE DECADE", uiState.favoriteDecade, Icons.Outlined.Schedule)
         Spacer(modifier = Modifier.height(12.dp))
         BottomDataRow("TOP DIRECTOR", uiState.topDirector, Icons.Outlined.Person)
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        // Streak Card variant for bottom
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f), shape = RoundedCornerShape(12.dp)),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(modifier = Modifier.width(4.dp).height(80.dp).background(MaterialTheme.colorScheme.primaryContainer))
-            Column(modifier = Modifier.padding(start = 16.dp, top = 20.dp, bottom = 20.dp, end = 16.dp).weight(1f)) {
-                Text("RECENT STREAK", style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 2.sp, fontSize = 9.sp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
-                Spacer(modifier = Modifier.height(4.dp))
-                Text("$streak Days", style = MaterialTheme.typography.titleMedium.copy(fontFamily = PlayfairDisplayFont, fontWeight = FontWeight.Bold, fontSize = 18.sp), color = MaterialTheme.colorScheme.onSurface)
-            }
-            Icon(Icons.AutoMirrored.Outlined.ShowChart, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), modifier = Modifier.padding(end = 20.dp))
-        }
     }
 }
 

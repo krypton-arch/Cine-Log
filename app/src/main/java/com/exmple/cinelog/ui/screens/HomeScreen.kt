@@ -137,8 +137,7 @@ fun HomeScreenRoute(
                 HomeHeroMasthead(
                     totalFilms = totalFilms,
                     totalMinutes = totalMinutes,
-                    watchlistCount = watchlistCount,
-                    onNavigateToWatchlist = onNavigateToWatchlist
+                    watchlistCount = watchlistCount
                 )
 
                 MovieCarouselSection(
@@ -149,90 +148,61 @@ fun HomeScreenRoute(
                     onMovieClick = onMovieClick
                 )
 
-                val recommended = popularMovies.firstOrNull()
-                if (recommended != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .glassCard(cornerRadius = 20.dp, alpha = 0.42f, borderAlpha = 0.1f)
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .glassCard(cornerRadius = 20.dp, alpha = 0.42f, borderAlpha = 0.1f)
-                            .padding(24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(14.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.AutoStories,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primaryContainer,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    "WATCHLIST JOURNEY",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        letterSpacing = 1.8.sp,
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            }
-
-                            Text(
-                                if (watchlistCount > 0) {
-                                    "$watchlistCount films are waiting in your private library."
-                                } else {
-                                    "Start your collection. Add films to your private library."
-                                },
-                                style = MaterialTheme.typography.headlineMedium,
-                                lineHeight = 34.sp
-                            )
-
-                            Text(
-                                recommended.title,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.76f)
-                            )
-
-                            OutlinedButton(
-                                onClick = onNavigateToWatchlist,
-                                shape = RoundedCornerShape(12.dp),
-                                border = BorderStroke(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-                                ),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.primaryContainer
-                                ),
-                                modifier = Modifier.align(Alignment.Start)
-                            ) {
-                                Text(
-                                    "OPEN LIBRARY",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.2.sp
-                                    )
-                                )
-                            }
-                        }
-
-                        AsyncImage(
-                            model = "https://image.tmdb.org/t/p/w500${recommended.poster_path}",
+                        Icon(
+                            Icons.Default.AutoStories,
                             contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(128.dp)
-                                .aspectRatio(2f / 3f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.12f),
-                                    RoundedCornerShape(12.dp)
-                                )
+                            tint = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            "WATCHLIST JOURNEY",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                letterSpacing = 1.8.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    }
+
+                    Text(
+                        if (watchlistCount > 0) {
+                            "$watchlistCount films are waiting in your private library."
+                        } else {
+                            "Start your collection. Add films to your private library."
+                        },
+                        style = MaterialTheme.typography.headlineMedium,
+                        lineHeight = 34.sp
+                    )
+
+                    OutlinedButton(
+                        onClick = onNavigateToWatchlist,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                        ),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        modifier = Modifier.align(Alignment.Start)
+                    ) {
+                        Text(
+                            "OPEN LIBRARY",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.2.sp
+                            )
                         )
                     }
                 }
@@ -272,8 +242,7 @@ fun HomeScreenRoute(
 private fun HomeHeroMasthead(
     totalFilms: Int,
     totalMinutes: Int,
-    watchlistCount: Int,
-    onNavigateToWatchlist: () -> Unit
+    watchlistCount: Int
 ) {
     val minutesDisplay = if (totalMinutes >= 1000) "%.1fk".format(totalMinutes / 1000f) else totalMinutes.toString()
     val headline = if (watchlistCount > 0) {
@@ -360,26 +329,6 @@ private fun HomeHeroMasthead(
             )
         }
 
-        OutlinedButton(
-            onClick = onNavigateToWatchlist,
-            shape = RoundedCornerShape(12.dp),
-            border = BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-            ),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.primaryContainer
-            ),
-            modifier = Modifier.align(Alignment.Start)
-        ) {
-            Text(
-                "OPEN LIBRARY",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.4.sp
-                )
-            )
-        }
     }
 }
 

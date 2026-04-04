@@ -116,16 +116,20 @@ class DiaryViewModel @Inject constructor(
         allLogs: List<LogWithMovie>,
         yearMonth: YearMonth
     ): Map<Int, List<LogWithMovie>> {
+        val zoneId = ZoneId.systemDefault()
         val startOfMonth = yearMonth.atDay(1)
-            .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        val endOfMonth = yearMonth.atEndOfMonth()
-            .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            .atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val endOfMonthExclusive = yearMonth.plusMonths(1)
+            .atDay(1)
+            .atStartOfDay(zoneId)
+            .toInstant()
+            .toEpochMilli()
 
         return allLogs
-            .filter { it.logEntry.watchDate in startOfMonth..endOfMonth }
+            .filter { it.logEntry.watchDate in startOfMonth until endOfMonthExclusive }
             .groupBy { log ->
                 Instant.ofEpochMilli(log.logEntry.watchDate)
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(zoneId)
                     .toLocalDate()
                     .dayOfMonth
             }
@@ -135,12 +139,16 @@ class DiaryViewModel @Inject constructor(
         allLogs: List<LogWithMovie>,
         yearMonth: YearMonth
     ): MonthStats {
+        val zoneId = ZoneId.systemDefault()
         val startOfMonth = yearMonth.atDay(1)
-            .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        val endOfMonth = yearMonth.atEndOfMonth()
-            .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            .atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val endOfMonthExclusive = yearMonth.plusMonths(1)
+            .atDay(1)
+            .atStartOfDay(zoneId)
+            .toInstant()
+            .toEpochMilli()
 
-        val monthLogs = allLogs.filter { it.logEntry.watchDate in startOfMonth..endOfMonth }
+        val monthLogs = allLogs.filter { it.logEntry.watchDate in startOfMonth until endOfMonthExclusive }
         val totalLogged = monthLogs.size
         val rated = monthLogs.filter { it.logEntry.rating > 0 }
         val avgRating = if (rated.isNotEmpty()) {
